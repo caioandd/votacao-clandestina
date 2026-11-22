@@ -1,0 +1,300 @@
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------------------
+   Sistema de marca · 3ª Copa Clandestina
+   Extraído do banner oficial: preto de fundo, placa branca do escudo,
+   filete amarelo, tipografia Anton + Inter.
+--------------------------------------------------------------------------- */
+@theme {
+  --color-ink: #0e0e10;
+  --color-surface: #16161a;
+  --color-surface-2: #1e1e22;
+  --color-line: #2a2a2e;
+  --color-line-2: #3a3a40;
+  --color-paper: #ffffff;
+  --color-gold: #f6c400;
+  --color-gold-deep: #c99e00;
+  --color-gold-100: #fff4c2;
+  --color-ash: #b5b5ba;
+  --color-ash-600: #7c7c84;
+  --color-navy: #2e2555;
+  --color-crimson: #c55041;
+  --color-success: #35c46a;
+
+  --font-display: 'Anton', 'Arial Narrow', Impact, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --radius-card: 16px;
+  --radius-chip: 10px;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* títulos */
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 0.94;
+  letter-spacing: 0.005em;
+}
+
+.kicker {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+}
+
+.rule {
+  height: 2px;
+  width: 100%;
+  background: var(--color-line);
+  border: 0;
+}
+
+.rule-gold {
+  height: 14px;
+  width: 100%;
+  background: var(--color-gold);
+  border: 0;
+}
+
+/* placa branca do escudo — moldura do banner */
+.plate {
+  background: var(--color-paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* números tabulares para contagem e notas */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* ---------------------------------------------------------------------------
+   Estrelas
+--------------------------------------------------------------------------- */
+.star-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 12px;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 140ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.star-btn:active {
+  transform: scale(0.9);
+}
+
+.star-svg {
+  width: 27px;
+  height: 27px;
+  display: block;
+  transition:
+    fill 140ms ease,
+    stroke 140ms ease,
+    transform 160ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.star-btn[data-filled='true'] .star-svg {
+  fill: var(--color-gold);
+  stroke: var(--color-gold);
+}
+
+.star-btn[data-filled='false'] .star-svg {
+  fill: transparent;
+  stroke: var(--color-line-2);
+}
+
+.star-btn[data-just='true'] .star-svg {
+  animation: star-pop 260ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+@keyframes star-pop {
+  0% {
+    transform: scale(0.82);
+  }
+  55% {
+    transform: scale(1.14);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.unknown-chip {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: var(--radius-chip);
+  border: 1px dashed var(--color-line-2);
+  background: transparent;
+  color: var(--color-ash);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    transform 140ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.unknown-chip:hover {
+  color: var(--color-paper);
+  border-color: var(--color-ash-600);
+}
+
+.unknown-chip:active {
+  transform: scale(0.96);
+}
+
+.unknown-chip[data-checked='true'] {
+  border-style: solid;
+  border-color: var(--color-ash-600);
+  background: var(--color-surface-2);
+  color: var(--color-paper);
+}
+
+/* ---------------------------------------------------------------------------
+   Entradas e momentos
+--------------------------------------------------------------------------- */
+.enter-plate {
+  animation: enter-plate 780ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes enter-plate {
+  from {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.enter-mask {
+  animation: enter-mask 820ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes enter-mask {
+  from {
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(6px);
+  }
+  to {
+    clip-path: inset(-20% -20% -20% -20%);
+    transform: none;
+  }
+}
+
+.enter-rise {
+  animation: enter-rise 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes enter-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.stamp {
+  animation: stamp 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes stamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.7) rotate(-9deg);
+  }
+  62% {
+    opacity: 1;
+    transform: scale(0.95) rotate(-3.5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-3.5deg);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Interações
+--------------------------------------------------------------------------- */
+.card-lift {
+  transition:
+    transform 180ms cubic-bezier(0.2, 0.8, 0.3, 1),
+    border-color 180ms ease,
+    background-color 180ms ease;
+}
+
+.card-lift:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-line-2);
+}
+
+.btn-press {
+  transition:
+    transform 130ms cubic-bezier(0.2, 0.8, 0.3, 1),
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
+}
+
+.btn-press:hover {
+  transform: translateY(-1px);
+}
+
+.btn-press:active {
+  transform: translateY(1px) scale(0.995);
+}
+
+/* scrollbar discreta */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-2) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

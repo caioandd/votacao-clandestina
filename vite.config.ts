@@ -29,4 +29,9 @@ export default defineConfig({
     sourcemap: false,
     target: 'es2022',
   },
+  server: {
+    // .taste-skill guarda os perfis do Chrome das capturas e shots as imagens:
+    // ficam fora do watcher (arquivos travados pelo Chrome e reload à toa).
+    watch: { ignored: ['**/.taste-skill/**', '**/shots/**'] },
+  },
 })

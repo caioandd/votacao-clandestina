@@ -585,7 +585,7 @@ function SettingsTab({
             type="datetime-local"
             value={deadline}
             onChange={(event) => setDeadline(event.target.value)}
-            className="h-12 rounded-[var(--radius-chip)] border border-line bg-surface px-4 text-[15px] text-paper focus:border-gold focus:outline-none"
+            className="h-12 rounded-[var(--radius-chip)] border border-line bg-surface px-4 text-[15px] text-paper focus:border-gold"
           />
           <Button
             disabled={busy || !deadline}
@@ -645,7 +645,7 @@ function SettingsTab({
               value={newName}
               onChange={(event) => setNewName(event.target.value)}
               placeholder="Ex.: Fulano de Tal"
-              className="h-12 w-64 rounded-[var(--radius-chip)] border border-line bg-surface px-4 text-[15px] text-paper placeholder:text-ash-600 focus:border-gold focus:outline-none"
+              className="h-12 w-64 rounded-[var(--radius-chip)] border border-line bg-surface px-4 text-[15px] text-paper placeholder:text-ash-600 focus:border-gold"
             />
           </label>
           <label className="flex flex-col gap-1.5">
@@ -654,7 +654,7 @@ function SettingsTab({
               value={newNick}
               onChange={(event) => setNewNick(event.target.value)}
               placeholder="opcional"
-              className="h-12 w-40 rounded-[var(--radius-chip)] border border-line bg-surface px-4 text-[15px] text-paper placeholder:text-ash-600 focus:border-gold focus:outline-none"
+              className="h-12 w-40 rounded-[var(--radius-chip)] border border-line bg-surface px-4 text-[15px] text-paper placeholder:text-ash-600 focus:border-gold"
             />
           </label>
           <label className="flex h-12 items-center gap-2 text-[14px] text-ash">

@@ -1,19 +1,49 @@
+import { useEffect, useRef } from 'react'
+import type { RefObject } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import escudo from '../assets/escudo.png'
-import { Button, Kicker } from '../components/ui'
-import { AppShell } from '../components/Layout'
+import { DemoBadge } from '../components/Layout'
 import { useApp } from '../state/AppProvider'
 import { useNow } from '../hooks/useNow'
 import { countdownTo, formatCountdown, formatShortDeadline } from '../lib/deadline'
 import { chromeIntentUrl, isAndroid, isInAppBrowser } from '../lib/browser'
 import { data } from '../lib/data'
 
+/**
+ * Monta o momento da seção (counter-rolls, momentos do kit): os algarismos dos
+ * números rolam uma vez quando a seção entra na tela. Sem script (ou com pouca
+ * animação) o número fica como está escrito no HTML — o momento é enfeite.
+ */
+function useMoment(ref: RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    let live = true
+    void (async () => {
+      try {
+        const mod = (await import(
+          /* @vite-ignore */ `${import.meta.env.BASE_URL}moments/moments.js`
+        )) as { mount?: (el: Element) => Promise<unknown> }
+        if (live && mod.mount) await mod.mount(el)
+      } catch {
+        // sem momento: os números já estão escritos na página
+      }
+    })()
+    return () => {
+      live = false
+    }
+  }, [ref])
+}
+
 export function Landing() {
   const { session, emailAllowed, publicState, ballot, phase, signIn, loadError } = useApp()
   const now = useNow(1000)
   const navigate = useNavigate()
+  const comoRef = useRef<HTMLElement | null>(null)
+  useMoment(comoRef)
 
   const closesAt = publicState?.closesAt ?? ''
+  const playerCount = publicState?.playerCount ?? 29
   const countdown = closesAt ? countdownTo(closesAt, now) : null
   const closed = phase === 'closed'
 
@@ -34,105 +64,186 @@ export function Landing() {
       ? 'Editar meus votos'
       : 'Continuar para a votação'
     : 'Entrar com Google'
+  const primaryButtonLabel = closed && !ballot ? 'Votação encerrada' : primaryLabel
 
   return (
-    <AppShell showHeader={false}>
-      {/* Placa do escudo — mesma composição do banner */}
-      <section className="plate enter-plate w-full border-b-[14px] border-gold">
-        <div className="flex h-[clamp(240px,36vh,380px)] w-full items-center justify-center">
-          <img
-            src={escudo}
-            alt="Escudo da Clandestina Futebol Clube"
-            className="h-[78%] w-auto max-w-[78%] object-contain"
-          />
+    <main className="landing">
+      <section className="hero" data-enter>
+        <div className="wrap">
+          <div className="hero-text hero-split">
+            <div className="hero-copy">
+              <p className="hero__kicker">
+                <span className="dot" aria-hidden="true" />
+                Votação oficial · 28/11 às 8h · IFBA
+              </p>
+
+              <h1 className="display">3ª Copa Clandestina de Futsal</h1>
+
+              <p className="hero__lead">
+                Dê uma nota de <strong>1 a 5 estrelas</strong> para cada jogador. A organização usa
+                as notas para montar os <strong>6 times</strong> equilibrados da copa.
+              </p>
+
+              {countdown ? (
+                <p className="hero-timer">
+                  <span>{closed ? 'Encerrada' : 'Fecha em'}</span>
+                  <b>{closed ? '00h 00m' : formatCountdown(countdown)}</b>
+                </p>
+              ) : null}
+
+              <div className="btn-row">
+                <button
+                  type="button"
+                  className="btn btn--primary"
+                  onClick={handlePrimary}
+                  disabled={closed && !ballot}
+                >
+                  {primaryButtonLabel}
+                </button>
+                <a className="btn btn--secondary" href="#como-funciona">
+                  Como funciona
+                </a>
+              </div>
+
+              <p className="hero-note">
+                Acesso restrito ao e-mail institucional <strong>@ifba.edu.br</strong>
+                {closesAt
+                  ? closed
+                    ? ` · encerrada em ${formatShortDeadline(closesAt)}`
+                    : ` · edite até ${formatShortDeadline(closesAt)}`
+                  : null}
+                {data.mode === 'demo' ? (
+                  <>
+                    {' '}
+                    <DemoBadge className="align-middle" />
+                  </>
+                ) : null}
+              </p>
+
+              {isInAppBrowser() ? (
+                <div className="hero-alert">
+                  <p className="hero-alert__title">Abra fora do WhatsApp</p>
+                  <p>
+                    O login do Google não funciona no navegador interno do WhatsApp.{' '}
+                    {isAndroid()
+                      ? 'Toque para abrir no Chrome:'
+                      : 'Toque em ⋯ e escolha “Abrir no Safari”.'}
+                  </p>
+                  {isAndroid() ? (
+                    <a className="btn btn--primary" href={chromeIntentUrl()}>
+                      Abrir no Chrome
+                    </a>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {loadError ? (
+                <p className="hero-note" style={{ color: 'var(--color-crimson)' }}>
+                  {loadError}
+                </p>
+              ) : null}
+
+              <dl className="hero-facts">
+                <div>
+                  <dt>Jogadores</dt>
+                  <dd>{playerCount}</dd>
+                </div>
+                <div>
+                  <dt>Times</dt>
+                  <dd>6</dd>
+                </div>
+                <div>
+                  <dt>Cédula</dt>
+                  <dd>1 por conta</dd>
+                </div>
+              </dl>
+            </div>
+
+            <div className="hero-visual">
+              <div className="plate">
+                <img src={escudo} alt="Escudo da Clandestina Futebol Clube" />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="flex flex-1 flex-col items-center justify-center gap-5 px-5 py-10 text-center sm:gap-6">
-        <Kicker className="enter-rise">Votação oficial</Kicker>
-
-        <h1 className="enter-mask display text-[clamp(40px,11vw,76px)] text-paper">
-          3ª Copa Clandestina
-          <span className="mt-1 block text-gold">de Futsal</span>
-        </h1>
-
-        <hr className="rule enter-rise max-w-xs" />
-
-        <p className="enter-rise max-w-md text-[15px] leading-relaxed text-ash">
-          Dê uma nota de <strong className="font-semibold text-paper">1 a 5 estrelas</strong> para
-          cada jogador. A organização usa as notas para montar os{' '}
-          <strong className="font-semibold text-paper">6 times</strong> equilibrados da copa.
-        </p>
-
-        <ul className="enter-rise flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-ash">
-          <li>{publicState?.playerCount ?? 29} jogadores</li>
-          <li className="text-line-2" aria-hidden="true">
-            ·
-          </li>
-          <li>6 times</li>
-          <li className="text-line-2" aria-hidden="true">
-            ·
-          </li>
-          <li>1 voto por conta</li>
-        </ul>
-
-        {countdown ? (
-          <div className="enter-rise flex items-center justify-center gap-3">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-ash">
-              {closed ? 'Encerrada' : 'Fecha em'}
-            </span>
-            <span className="display tnum text-[30px] leading-none text-paper sm:text-[36px]">
-              {closed ? '00h 00m' : formatCountdown(countdown)}
-            </span>
-          </div>
-        ) : null}
-
-        <div className="enter-rise flex w-full max-w-sm flex-col items-center gap-3 pt-1">
-          <Button size="lg" full onClick={handlePrimary} disabled={closed && !ballot}>
-            {closed && !ballot ? 'Votação encerrada' : primaryLabel}
-          </Button>
-          <p className="text-[12px] leading-relaxed text-ash-600">
-            Acesso restrito ao e-mail institucional <strong className="text-ash">@ifba.edu.br</strong>
-            {closesAt
-              ? closed
-                ? ` · encerrada em ${formatShortDeadline(closesAt)}`
-                : ` · pode editar até ${formatShortDeadline(closesAt)}`
-              : null}
-          </p>
-        </div>
-
-        {isInAppBrowser() ? (
-          <div className="enter-rise w-full max-w-sm rounded-[var(--radius-card)] border border-gold/40 bg-gold/8 p-4 text-left">
-            <p className="text-[13px] font-semibold text-gold">Abra fora do WhatsApp</p>
-            <p className="mt-1 text-[13px] leading-relaxed text-ash">
-              O login do Google não funciona no navegador interno do WhatsApp.{' '}
-              {isAndroid() ? 'Toque para abrir no Chrome:' : 'Toque em ⋯ e escolha “Abrir no Safari”.'}
+      <section
+        id="como-funciona"
+        ref={comoRef}
+        className="como"
+        data-moment="counter-rolls"
+        aria-label="Como funciona a votação"
+      >
+        <div className="wrap">
+          <div className="section-head">
+            <h2 className="display">Como funciona</h2>
+            <p>
+              Uma cédula por conta IFBA: dê as notas, a organização soma tudo e volta com os 6
+              times equilibrados. O resultado é só da organização — nunca é público.
             </p>
-            {isAndroid() ? (
-              <a
-                href={chromeIntentUrl()}
-                className="mt-3 inline-flex h-10 items-center rounded-full bg-gold px-5 text-[13px] font-semibold text-ink"
-              >
-                Abrir no Chrome
-              </a>
-            ) : null}
           </div>
-        ) : null}
 
-        {loadError ? (
-          <p className="max-w-sm text-[13px] text-crimson">{loadError}</p>
-        ) : null}
+          <ol className="steps grid">
+            <li className="span-4">
+              <p className="step-num">1</p>
+              <h3>Entre com o IFBA</h3>
+              <p>
+                Login com o Google institucional. Só e-mails <strong>@ifba.edu.br</strong> podem
+                votar, e cada conta tem uma cédula.
+              </p>
+            </li>
+            <li className="span-4">
+              <p className="step-num">2</p>
+              <h3>Dê as notas</h3>
+              <p>
+                De <strong>1 a 5 estrelas</strong> para cada jogador — ou “Não sei” para quem você
+                não conhece. Dá para editar até o prazo.
+              </p>
+            </li>
+            <li className="span-4">
+              <p className="step-num">3</p>
+              <h3>A organização equilibra</h3>
+              <p>
+                As notas viram um ranking interno, e os <strong>6 times</strong> saem equilibrados
+                por posição, em snake draft.
+              </p>
+            </li>
+          </ol>
 
-        <div className="enter-rise mt-2 flex flex-col items-center gap-2 text-[13px]">
-          <Link to="/regulamento" className="text-ash underline decoration-line-2 underline-offset-4 transition-colors hover:text-paper">
-            Como funciona a votação
-          </Link>
+          <dl className="stats">
+            <div>
+              <dt>jogadores na lista</dt>
+              <dd className="t-stat">{playerCount}</dd>
+            </div>
+            <div>
+              <dt>times equilibrados</dt>
+              <dd className="t-stat">6</dd>
+            </div>
+            <div>
+              <dt>cédula por conta, editável</dt>
+              <dd className="t-stat">1</dd>
+            </div>
+          </dl>
+
+          <div className="btn-row">
+            <button
+              type="button"
+              className="btn btn--primary"
+              onClick={handlePrimary}
+              disabled={closed && !ballot}
+            >
+              {primaryButtonLabel}
+            </button>
+            <Link className="btn btn--secondary" to="/regulamento">
+              Regulamento
+            </Link>
+            <Link className="link-under" to="/privacidade">
+              Privacidade e dados
+            </Link>
+          </div>
         </div>
       </section>
-
-      <div className="pb-10 text-center text-[12px] text-ash-600">
-        {data.mode === 'demo' ? 'Modo demonstração · dados apenas neste navegador' : null}
-      </div>
-    </AppShell>
+    </main>
   )
 }

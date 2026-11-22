@@ -109,7 +109,7 @@ export function Identify() {
                 maxLength={NAME_MAX}
                 autoComplete="name"
                 placeholder="Ex.: Caio Andrade"
-                className="h-14 rounded-[var(--radius-card)] border border-line bg-surface px-4 text-[16px] text-paper placeholder:text-ash-600 focus:border-gold focus:outline-none"
+                className="h-14 rounded-[var(--radius-card)] border border-line bg-surface px-4 text-[16px] text-paper placeholder:text-ash-600 focus:border-gold"
               />
             </label>
 

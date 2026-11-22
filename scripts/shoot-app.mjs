@@ -77,22 +77,23 @@ const clickHas = (t) => `{ const btn = [...document.querySelectorAll('button')].
 const pause = (ms) => `; await new Promise((r) => setTimeout(r, ${ms}));`
 
 const PRESETS = {
-  identificar: { hash: '#/entrar', seed: BOOT },
-  votar: { hash: '#/votar', seed: SEED_DRAFT },
-  revisar: { hash: '#/revisar', seed: SEED_DRAFT },
-  enviado: { hash: '#/enviado', seed: SEED_SUBMITTED },
-  encerrada: { hash: '#/encerrada', seed: SEED_SUBMITTED, closed: true },
-  regulamento: { hash: '#/regulamento' },
-  privacidade: { hash: '#/privacidade' },
-  admin: { hash: '#/admin', seed: SEED_BALLOTS },
-  ranking: { hash: '#/admin', seed: SEED_BALLOTS, act: click('Ranking') + pause(300) },
+  landing: { path: '/' },
+  identificar: { path: '/entrar', seed: BOOT },
+  votar: { path: '/votar', seed: SEED_DRAFT },
+  revisar: { path: '/revisar', seed: SEED_DRAFT },
+  enviado: { path: '/enviado', seed: SEED_SUBMITTED },
+  encerrada: { path: '/encerrada', seed: SEED_SUBMITTED, closed: true },
+  regulamento: { path: '/regulamento' },
+  privacidade: { path: '/privacidade' },
+  admin: { path: '/admin', seed: SEED_BALLOTS },
+  ranking: { path: '/admin', seed: SEED_BALLOTS, act: click('Ranking') + pause(300) },
   times: {
-    hash: '#/admin',
+    path: '/admin',
     seed: SEED_BALLOTS,
     act: click('Times') + pause(500) + clickHas('Gerar 6 times') + pause(900),
   },
-  cedulas: { hash: '#/admin', seed: SEED_BALLOTS, act: click('Cédulas') + pause(300) },
-  ajustes: { hash: '#/admin', seed: SEED_BALLOTS, act: click('Ajustes') + pause(300) },
+  cedulas: { path: '/admin', seed: SEED_BALLOTS, act: click('Cédulas') + pause(300) },
+  ajustes: { path: '/admin', seed: SEED_BALLOTS, act: click('Ajustes') + pause(300) },
 }
 
 const preset = PRESETS[route]
@@ -266,10 +267,10 @@ try {
     }
   }
 
-  // 3. vai para a rota e recarrega (garante boot limpo com o estado semeado)
+  // 3. vai para a rota — a navegação de documento novo já é um boot limpo com o
+  // estado semeado (na mesma URL o Chrome recarrega, o que também basta)
   const l2 = nextLoad()
-  await S('Page.navigate', { url: `${base}/${preset.hash}` })
-  await S('Page.reload')
+  await S('Page.navigate', { url: `${base}${preset.path}` })
   await Promise.race([l2, sleep(20000)])
   await settleAfterLoad()
 
@@ -290,12 +291,13 @@ try {
       .slice(0, 10)
       .map((e) => e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\\s+/).slice(0, 3).join('.') : '') + ' → ' + Math.round(e.getBoundingClientRect().right))
     return {
-      hash: location.hash,
+      route: location.pathname + location.hash,
       scrollW: document.documentElement.scrollWidth,
       innerW: vw,
       scrollH: Math.ceil(Math.max(document.documentElement.scrollHeight, document.body.scrollHeight)),
       title: document.title,
       wide,
+      probe: window.__probe !== undefined ? window.__probe : null,
       text: document.body.innerText.slice(0, 200).replace(/\\s+/g, ' '),
     }
   })()`)
@@ -321,8 +323,9 @@ try {
   fs.writeFileSync(path.resolve(out), Buffer.from(data, 'base64'))
 
   console.log(`saved ${out} (${clip ? `${clip.w}x${clip.h}` : `${W}x${height}`}, dsf ${DSF})${clip ? ` · clip ${clipSel}` : ''}`)
-  console.log(`  rota ${audit.hash} · scrollW ${audit.scrollW} / innerW ${audit.innerW}${audit.scrollW > audit.innerW ? '  ← ESTOURO HORIZONTAL' : ''}`)
+  console.log(`  rota ${audit.route} · scrollW ${audit.scrollW} / innerW ${audit.innerW}${audit.scrollW > audit.innerW ? '  ← ESTOURO HORIZONTAL' : ''}`)
   if (audit.wide.length) console.log('  fora da tela: ' + audit.wide.join(' | '))
+  if (audit.probe !== null) console.log('  probe: ' + JSON.stringify(audit.probe))
   if (seedResult) console.log('  seed: ' + JSON.stringify(seedResult))
   if (logs.length) console.log(logs.slice(0, 8).join('\n'))
   if (!audit.text) console.log('  AVISO: página vazia')

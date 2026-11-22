@@ -1,4 +1,4 @@
-import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppProvider } from './state/AppProvider'
 import { Landing } from './routes/Landing'
 import { Identify } from './routes/Identify'
@@ -14,7 +14,7 @@ import { RequireAuth } from './routes/guards'
 export default function App() {
   return (
     <AppProvider>
-      <HashRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/restrito" element={<Restricted />} />
@@ -28,7 +28,7 @@ export default function App() {
           <Route path="/admin" element={<RequireAuth><Admin /></RequireAuth>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </HashRouter>
+      </BrowserRouter>
     </AppProvider>
   )
 }

@@ -1,3 +1,5 @@
+import { copyFileSync, existsSync } from 'node:fs'
+import { resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
@@ -6,7 +8,22 @@ import { defineConfig } from 'vite'
 // Localmente fica "/" e o app roda em http://localhost:5173/
 export default defineConfig({
   base: process.env.VITE_BASE ?? '/',
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    {
+      // GitHub Pages não tem fallback de SPA: o 404.html é servido na rota
+      // profunda (ex.: /regulamento) e o roteador resolve o caminho. Como o
+      // index.html aponta para os assets com caminho absoluto, a cópia vale.
+      name: 'gh-pages-404',
+      apply: 'build',
+      closeBundle() {
+        const dist = resolve(process.cwd(), 'dist')
+        const index = resolve(dist, 'index.html')
+        if (existsSync(index)) copyFileSync(index, resolve(dist, '404.html'))
+      },
+    },
+  ],
   build: {
     outDir: 'dist',
     sourcemap: false,

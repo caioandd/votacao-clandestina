@@ -34,6 +34,8 @@ export function DemoBadge({ className }: { className?: string }) {
   )
 }
 
+// As telas internas são um fragmento: header, main e footer caem direto no body
+// (#root é display: contents), e o body é a coluna flex que segura a página.
 export function AppShell({
   children,
   right,
@@ -44,7 +46,7 @@ export function AppShell({
   showHeader?: boolean
 }) {
   return (
-    <div className="flex min-h-dvh flex-col bg-ink">
+    <>
       {showHeader ? (
         <header className="sticky top-0 z-30 border-b border-line bg-ink/88 backdrop-blur-sm">
           <div className="mx-auto flex h-16 w-full max-w-3xl items-center justify-between gap-3 px-4 sm:px-6">
@@ -64,7 +66,7 @@ export function AppShell({
         </header>
       ) : null}
 
-      <main className="flex flex-1 flex-col">{children}</main>
+      <main className="site-main">{children}</main>
 
       <footer className="border-t border-line px-4 py-8 sm:px-6">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 text-[12px] text-ash-600">
@@ -82,7 +84,7 @@ export function AppShell({
           </div>
         </div>
       </footer>
-    </div>
+    </>
   )
 }
 

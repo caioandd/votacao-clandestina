@@ -42,11 +42,13 @@ teste* → aba **Times** → *Gerar 6 times*.
 2. No menu **SQL Editor**, cole todo o conteúdo de
    [`supabase/migrations/20261122000100_init.sql`](supabase/migrations/20261122000100_init.sql)
    e clique em **Run**. Isso cria as tabelas, as regras de acesso (RLS), as funções
-   de votação e a lista dos 29 jogadores.
+   de votação e a lista dos 30 jogadores.
    - Pode rodar de novo sem medo: não duplica jogadores nem apaga votos.
 3. Em **Project Settings → API**, copie:
    - **Project URL** → `VITE_SUPABASE_URL`
-   - **anon public key** → `VITE_SUPABASE_ANON_KEY`
+   - a chave pública → `VITE_SUPABASE_ANON_KEY` (no projeto novo ela aparece como
+     **publishable key**, `sb_publishable_...`; é a antiga *anon key* renomeada:
+     vai no site, pode ser pública)
 
 Crie o `.env.local` na raiz:
 
@@ -55,8 +57,9 @@ cp .env.example .env.local
 # preencha as duas variáveis
 ```
 
-> A `anon key` é pública por design: quem protege os votos são as políticas de
-> RLS. A `service_role` **nunca** entra no site — só em scripts locais.
+> A chave pública (anon/publishable) é pública por design: quem protege os votos
+> são as políticas de RLS. A **secret**/**service_role** nunca entra no site —
+> só em scripts locais.
 
 ---
 

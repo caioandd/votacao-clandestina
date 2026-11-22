@@ -581,7 +581,7 @@ create policy team_drafts_admin on public.team_drafts
 
 -- ------------------------------------------------------------- LISTA SEED
 
--- 29 nomes enviados pela organização (o 30º entra pelo painel, em Ajustes).
+-- 30 nomes enviados pela organização.
 do $$
 begin
   if not exists (select 1 from public.players) then
@@ -614,7 +614,8 @@ begin
       ('Iran', null, 26),
       ('Luiz', null, 27),
       ('Rian', 'Civil', 28),
-      ('Sávio', null, 29);
+      ('Sávio', null, 29),
+      ('João', 'Pelicano', 30);
   end if;
 end;
 $$;

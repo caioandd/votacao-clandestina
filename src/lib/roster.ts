@@ -1,5 +1,5 @@
 // Roster oficial da 3ª Copa Clandestina.
-// Fonte: lista enviada pela organização (29 nomes; o 30º entra pelo painel admin).
+// Fonte: lista enviada pela organização (30 nomes).
 export type RosterEntry = {
   n: number
   name: string
@@ -37,4 +37,5 @@ export const ROSTER: RosterEntry[] = [
   { n: 27, name: 'Luiz' },
   { n: 28, name: 'Rian', nick: 'Civil' },
   { n: 29, name: 'Sávio' },
+  { n: 30, name: 'João', nick: 'Pelicano' },
 ]

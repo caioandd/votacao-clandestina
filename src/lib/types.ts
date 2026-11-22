@@ -29,7 +29,8 @@ export type RankingRow = {
   mean: number | null
   median: number | null
   abstentions: number
-  bayes: number | null
+  /** Estrela inteira mais votada (1–5); empate resolve pela estrela mais alta. */
+  nota: number | null
   distribution: Record<string, number>
 }
 
@@ -84,6 +85,8 @@ export type DataAdapter = {
   addPlayer: (fullName: string, nickname: string | null, isGoalkeeper: boolean) => Promise<void>
   setDeadline: (isoDate: string) => Promise<void>
   deleteBallot: (ballotId: string) => Promise<void>
+  /** Apaga todas as cédulas e notas. Retorna quantas cédulas foram removidas. */
+  clearBallots: () => Promise<number>
   /** Só no modo demonstração: gera cédulas sintéticas para testar o ranking. */
   seedDemoBallots?: (count: number) => Promise<void>
   /** Só no modo demonstração: apaga todos os dados locais. */

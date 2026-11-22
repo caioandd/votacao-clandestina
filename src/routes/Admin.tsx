@@ -164,7 +164,7 @@ export function Admin() {
             <>
               {tab === 'ranking' ? (
                 <RankingTab ranking={ranking} onExport={() => {
-                  const header = 'pos,jogador,apelido,goleiro,votos,media,mediana,indice,abstencoes,1,2,3,4,5'
+                  const header = 'pos,jogador,apelido,goleiro,votos,media,mediana,nota,abstencoes,1,2,3,4,5'
                   const lines = ranking.map((row, index) =>
                     [
                       index + 1,
@@ -174,7 +174,7 @@ export function Admin() {
                       row.n,
                       row.mean?.toFixed(3) ?? '',
                       row.median?.toFixed(3) ?? '',
-                      row.bayes?.toFixed(3) ?? '',
+                      row.nota ?? '',
                       row.abstentions,
                       row.distribution['1'] ?? 0,
                       row.distribution['2'] ?? 0,
@@ -196,6 +196,27 @@ export function Admin() {
                     if (!window.confirm('Apagar esta cédula? A pessoa poderá votar de novo.')) return
                     await data.deleteBallot(id)
                     await load()
+                  }}
+                  onClearAll={async () => {
+                    if (
+                      !window.confirm(
+                        `Apagar TODAS as ${ballots.length} ${ballots.length === 1 ? 'cédula' : 'cédulas'} e todas as notas? Esta ação não pode ser desfeita — cada pessoa poderá votar de novo.`,
+                      )
+                    ) {
+                      return
+                    }
+                    setMessage(null)
+                    try {
+                      const removed = await data.clearBallots()
+                      setMessage(
+                        `${removed} ${removed === 1 ? 'cédula apagada' : 'cédulas apagadas'}. O pessoal já pode votar de novo.`,
+                      )
+                      await load()
+                    } catch (error) {
+                      setMessage(
+                        error instanceof Error ? error.message : 'Não foi possível limpar os votos.',
+                      )
+                    }
                   }}
                   onSeed={
                     seedDemoBallots
@@ -238,6 +259,7 @@ export function Admin() {
 }
 
 function RankingTab({ ranking, onExport }: { ranking: RankingRow[]; onExport: () => void }) {
+  const [expanded, setExpanded] = useState<string | null>(null)
   const voted = ranking.filter((row) => row.n > 0)
   const global = voted.length
     ? voted.reduce((acc, row) => acc + (row.mean ?? 0), 0) / voted.length
@@ -247,9 +269,10 @@ function RankingTab({ ranking, onExport }: { ranking: RankingRow[]; onExport: ()
     <section className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="max-w-md text-[13px] leading-relaxed text-ash-600">
-          <strong className="text-ash">Índice</strong> é a média puxada para a média geral (peso 5):
-          quem recebeu poucos votos não ultrapassa quem recebeu muitos. É esse número que ordena os
-          times.
+          <strong className="text-ash">Nota</strong> é a estrela que mais apareceu nos votos (empate:
+          vale a estrela mais alta) — ex.: 4 votos de 3★ e 2 de 4★ = nota 3★. É a nota que ordena o
+          ranking e os times; empate na nota desempata pela média. Toque no nome para ver os votos
+          por estrela.
         </p>
         <Button variant="ghost" size="sm" onClick={onExport} disabled={!ranking.length}>
           Baixar CSV
@@ -263,42 +286,106 @@ function RankingTab({ ranking, onExport }: { ranking: RankingRow[]; onExport: ()
       ) : null}
 
       <div className="flex flex-col gap-2">
-        {ranking.map((row, index) => (
-          <article
-            key={row.id}
-            className="flex flex-col gap-2 rounded-[var(--radius-card)] border border-line bg-surface px-4 py-3"
-          >
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-3">
-                <span className="tnum display w-8 text-[20px] text-ash-600">{index + 1}</span>
-                <div className="min-w-0">
-                  <h3 className="truncate text-[15px] font-semibold text-paper">
-                    {row.fullName}
-                    {row.nickname ? (
-                      <span className="ml-2 text-[12px] font-normal text-ash-600">
-                        {row.nickname}
-                      </span>
-                    ) : null}
-                  </h3>
-                  <p className="tnum text-[12px] text-ash-600">
-                    {row.n} {row.n === 1 ? 'voto' : 'votos'} · média {row.mean?.toFixed(2) ?? '—'} ·
-                    mediana {row.median?.toFixed(1) ?? '—'} · {row.abstentions} “não sei”
-                    {row.isGoalkeeper ? ' · goleiro' : ''}
-                  </p>
+        {ranking.map((row, index) => {
+          const isOpen = expanded === row.id
+          return (
+            <article
+              key={row.id}
+              className="flex flex-col gap-2 rounded-[var(--radius-card)] border border-line bg-surface px-4 py-3"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="tnum display w-8 text-[20px] text-ash-600">{index + 1}</span>
+                  <div className="min-w-0">
+                    <h3 className="truncate text-[15px] font-semibold text-paper">
+                      <button
+                        type="button"
+                        onClick={() => setExpanded(isOpen ? null : row.id)}
+                        aria-expanded={isOpen}
+                        className="text-left hover:text-gold"
+                      >
+                        {row.fullName}
+                        {row.nickname ? (
+                          <span className="ml-2 text-[12px] font-normal text-ash-600">
+                            {row.nickname}
+                          </span>
+                        ) : null}
+                        <span aria-hidden className="ml-2 text-[11px] text-ash-600">
+                          {isOpen ? '▾' : '▸'}
+                        </span>
+                      </button>
+                    </h3>
+                    <p className="tnum text-[12px] text-ash-600">
+                      {row.n} {row.n === 1 ? 'voto' : 'votos'} · média {row.mean?.toFixed(2) ?? '—'} ·
+                      mediana {row.median?.toFixed(1) ?? '—'} · {row.abstentions} “não sei”
+                      {row.isGoalkeeper ? ' · goleiro' : ''}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] uppercase tracking-[0.16em] text-ash-600">nota</span>
+                  <span className="display tnum text-[24px] text-gold">
+                    {row.nota !== null ? `${row.nota}★` : '—'}
+                  </span>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] uppercase tracking-[0.16em] text-ash-600">índice</span>
-                <span className="display tnum text-[24px] text-gold">
-                  {row.bayes ? row.bayes.toFixed(2) : '—'}
-                </span>
-              </div>
-            </div>
-            <Distribution distribution={row.distribution} />
-          </article>
-        ))}
+
+              {isOpen ? <StarBreakdown row={row} /> : null}
+
+              <Distribution distribution={row.distribution} />
+            </article>
+          )
+        })}
       </div>
     </section>
+  )
+}
+
+function StarBreakdown({ row }: { row: RankingRow }) {
+  return (
+    <div className="rounded-[var(--radius-chip)] border border-line bg-surface-2 px-4 py-2">
+      <table className="tnum w-full max-w-[300px] text-[13px]">
+        <caption className="sr-only">Votos por quantidade de estrelas — {row.fullName}</caption>
+        <thead>
+          <tr>
+            <th className="pb-1 text-left text-[11px] font-normal uppercase tracking-[0.16em] text-ash-600">
+              Estrelas
+            </th>
+            <th className="pb-1 text-right text-[11px] font-normal uppercase tracking-[0.16em] text-ash-600">
+              Votos
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {[5, 4, 3, 2, 1].map((star) => {
+            const count = row.distribution[String(star)] ?? 0
+            const isNota = row.nota === star && count > 0
+            return (
+              <tr key={star}>
+                <td className={cn('py-0.5 pr-4', isNota ? 'font-semibold text-gold' : 'text-ash')}>
+                  {star}★
+                  {isNota ? (
+                    <span className="ml-2 text-[10px] uppercase tracking-[0.16em]">nota</span>
+                  ) : null}
+                </td>
+                <td
+                  className={cn(
+                    'py-0.5 text-right',
+                    isNota ? 'font-semibold text-gold' : 'text-ash',
+                  )}
+                >
+                  {count}
+                </td>
+              </tr>
+            )
+          })}
+          <tr>
+            <td className="border-t border-line pt-1 pr-4 text-ash-600">não sei</td>
+            <td className="border-t border-line pt-1 text-right text-ash-600">{row.abstentions}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   )
 }
 
@@ -310,7 +397,7 @@ function TeamsTab({ ranking }: { ranking: RankingRow[] }) {
   const pool: TeamPlayer[] = ranking.map((row) => ({
     id: row.id,
     name: row.nickname ? `${row.fullName} (${row.nickname})` : row.fullName,
-    score: row.bayes ?? row.mean ?? 3,
+    score: row.nota ?? row.mean ?? 3,
     isGoalkeeper: row.isGoalkeeper,
   }))
 
@@ -371,7 +458,7 @@ function TeamsTab({ ranking }: { ranking: RankingRow[] }) {
       </div>
 
       <p className="max-w-lg text-[13px] leading-relaxed text-ash-600">
-        Snake draft pela ordem do índice + ajuste fino automático para as médias ficarem próximas. Os{' '}
+        Snake draft pela ordem da nota + ajuste fino automático para as médias ficarem próximas. Os{' '}
         {pool.length - outfield.length} goleiros ficam fora da divisão. Toque em um jogador e depois
         em outro para trocar de time.
       </p>
@@ -454,11 +541,13 @@ function TeamsTab({ ranking }: { ranking: RankingRow[] }) {
 function BallotsTab({
   ballots,
   onDelete,
+  onClearAll,
   onSeed,
   onReset,
 }: {
   ballots: AdminBallot[]
   onDelete: (id: string) => void
+  onClearAll?: () => void
   onSeed?: () => void
   onReset?: () => void
 }) {
@@ -534,6 +623,25 @@ function BallotsTab({
           </p>
         ) : null}
       </div>
+
+      {onClearAll ? (
+        <div className="flex flex-col gap-2 rounded-[var(--radius-card)] border border-crimson/40 bg-crimson/8 p-4">
+          <h2 className="text-[15px] font-semibold text-paper">Limpar votos</h2>
+          <p className="max-w-lg text-[13px] leading-relaxed text-ash-600">
+            Apaga <strong className="text-ash">todas</strong> as cédulas e notas de uma vez, para
+            recomeçar a votação do zero. Vai pedir confirmação antes, e não tem como desfazer.
+          </p>
+          <Button
+            variant="danger"
+            size="sm"
+            className="self-start"
+            onClick={onClearAll}
+            disabled={!ballots.length}
+          >
+            Apagar todos os votos{ballots.length ? ` (${ballots.length})` : ''}
+          </Button>
+        </div>
+      ) : null}
     </section>
   )
 }

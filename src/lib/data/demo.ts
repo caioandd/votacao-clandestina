@@ -104,11 +104,6 @@ function emit() {
   for (const listener of listeners) listener(session)
 }
 
-function round(value: number, digits = 3) {
-  const factor = 10 ** digits
-  return Math.round(value * factor) / factor
-}
-
 function percentileMedian(values: number[]): number | null {
   if (!values.length) return null
   const sorted = [...values].sort((a, b) => a - b)
@@ -212,6 +207,16 @@ export function createDemoAdapter(): DataAdapter {
         }
         const n = values.length
         const mean = n ? values.reduce((a, b) => a + b, 0) / n : null
+        // nota = estrela mais votada (empate: a mais alta)
+        let nota: number | null = null
+        let best = 0
+        for (const star of [5, 4, 3, 2, 1]) {
+          const count = distribution[String(star)]
+          if (count > best) {
+            best = count
+            nota = star
+          }
+        }
         return {
           id: player.id,
           fullName: player.fullName,
@@ -221,17 +226,17 @@ export function createDemoAdapter(): DataAdapter {
           mean,
           median: percentileMedian(values),
           abstentions,
-          bayes: null as number | null,
+          nota,
           distribution,
         }
       })
-      const means = rows.filter((r) => r.n > 0).map((r) => r.mean as number)
-      const global = means.length ? means.reduce((a, b) => a + b, 0) / means.length : 0
-      for (const row of rows) {
-        if (!row.n || row.mean === null) continue
-        row.bayes = round((row.mean * row.n + 5 * global) / (row.n + 5))
-      }
-      return rows.sort((a, b) => (b.bayes ?? -1) - (a.bayes ?? -1))
+      return rows.sort((a, b) => {
+        const byNota = (b.nota ?? 0) - (a.nota ?? 0)
+        if (byNota) return byNota
+        const byMean = (b.mean ?? 0) - (a.mean ?? 0)
+        if (byMean) return byMean
+        return a.fullName.localeCompare(b.fullName)
+      })
     },
 
     async listBallots(): Promise<AdminBallot[]> {
@@ -282,6 +287,14 @@ export function createDemoAdapter(): DataAdapter {
       const store = getStore()
       store.ballots = store.ballots.filter((b) => b.id !== ballotId)
       save(store)
+    },
+
+    async clearBallots() {
+      const store = getStore()
+      const total = store.ballots.length
+      store.ballots = []
+      save(store)
+      return total
     },
 
     async seedDemoBallots(count) {

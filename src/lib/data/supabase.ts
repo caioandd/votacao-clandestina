@@ -24,6 +24,7 @@ const MESSAGES: Record<string, string> = {
   invalid_name: 'Confira o nome informado.',
   email_domain_not_allowed: 'Acesso restrito ao e-mail institucional @ifba.edu.br.',
   not_authenticated: 'Entre com o Google para continuar.',
+  not_admin: 'Esta conta não tem permissão da organização.',
 }
 
 function friendly(message?: string, fallback = 'Não foi possível concluir. Tente de novo.') {
@@ -172,7 +173,7 @@ export function createSupabaseAdapter(url: string, anonKey: string): DataAdapter
         mean: num(row.mean),
         median: num(row.median),
         abstentions: Number(row.abstentions ?? 0),
-        bayes: num(row.bayes),
+        nota: num(row.nota),
         distribution: (row.distribution ?? {}) as Record<string, number>,
       }))
     },
@@ -219,6 +220,12 @@ export function createSupabaseAdapter(url: string, anonKey: string): DataAdapter
     async deleteBallot(ballotId) {
       const { error } = await supabase.rpc('admin_delete_ballot', { p_ballot_id: ballotId })
       if (error) throw new Error(friendly(error.message))
+    },
+
+    async clearBallots() {
+      const { data, error } = await supabase.rpc('admin_clear_ballots')
+      if (error) throw new Error(friendly(error.message))
+      return Number(data ?? 0)
     },
   }
 }

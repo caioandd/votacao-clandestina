@@ -139,9 +139,9 @@ Tudo em `#/admin`:
 
 | Aba | Para que serve |
 |---|---|
-| **Ranking** | Índice, média, mediana, votos e “não sei” de cada jogador. CSV para planilha. |
+| **Ranking** | Nota (estrela mais votada), média, mediana, votos e “não sei” de cada jogador. Toque no nome para abrir a tabela por estrela. CSV para planilha. |
 | **Times** | Gera 6 times equilibrados, permite trocas manuais e exporta texto para WhatsApp + CSV. |
-| **Cédulas** | Quem já votou (nome, e-mail, versão, horário). Permite apagar uma cédula. |
+| **Cédulas** | Quem já votou (nome, e-mail, versão, horário), apagar uma cédula e a caixa **Limpar votos** (apaga todas, pedindo confirmação). |
 | **Ajustes** | Prazo final, marcar goleiros, adicionar jogador. |
 
 **Marcar goleiros** (Ajustes): goleiros votam normalmente, mas ficam fora da
@@ -179,12 +179,16 @@ Regras garantidas pelo banco:
 - Trigger de defesa bloqueia escrita fora do prazo mesmo em chamadas diretas.
 - Ranking exposto apenas para quem está em `admins`.
 
-### Índice usado nos times
+### Nota usada nos times
 
-`índice = (média × nº de votos + 5 × média geral) / (nº de votos + 5)`
+`nota = estrela inteira (1–5) que mais aparece nas notas do jogador` — empate
+resolve pela estrela mais alta; quem não recebeu nenhuma nota fica sem nota e
+vai para o fim do ranking.
 
-Isso puxa quem tem poucos votos para perto da média geral, evitando que 2 votos
-de 5 superem 20 votos de 4,5. As médias e medianas ficam ao lado, no painel.
+Ex.: 4 votos de 3★ + 2 votos de 4★ → nota 3★. A nota ordena o ranking e o
+snake draft dos times; empate na nota desempata pela média. Média e mediana
+continuam no painel como informação, e a tabela por estrela abre ao tocar no
+nome do jogador.
 
 ---
 

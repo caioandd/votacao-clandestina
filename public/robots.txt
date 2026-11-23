@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://caioandd.github.io/votacao-clandestina/sitemap.xml

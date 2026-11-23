@@ -44,13 +44,14 @@ export function Regulamento() {
 
           <Block title="Como as notas são usadas">
             <p>
-              A organização usa as notas para dividir os participantes em{' '}
-              <strong className="text-paper">6 times equilibrados</strong>. O critério é a média
-              ponderada de cada jogador: quem tem poucos votos é puxado para perto da média geral,
-              para não ficar à frente de quem recebeu muitos votos.
+              Cada jogador recebe uma <strong className="text-paper">nota</strong>: a estrela (de 1
+              a 5) que <strong className="text-paper">mais apareceu</strong> nos votos dele — por
+              exemplo, 4 votos de 3 estrelas e 2 votos de 4 estrelas dão nota 3. Empate entre
+              estrelas resolve pela mais alta. A organização usa essas notas para dividir os
+              participantes em <strong className="text-paper">6 times equilibrados</strong>.
             </p>
             <p>
-              “Não sei” não entra na média — conta apenas como abstenção. Goleiros participam da
+              “Não sei” não entra na nota — conta apenas como abstenção. Goleiros participam da
               votação, mas neste momento não entram na divisão dos times.
             </p>
           </Block>
@@ -83,40 +84,139 @@ export function Privacidade() {
           <header className="flex flex-col gap-3">
             <Kicker>Privacidade</Kicker>
             <h1 className="display text-[38px] leading-none text-paper sm:text-[46px]">
-              Seus dados nesta votação
+              Política de Privacidade
             </h1>
+            <p className="text-[13px] text-ash-600">Última atualização: 23 de novembro de 2026.</p>
           </header>
 
-          <Block title="O que é guardado">
+          <Block title="1. Quem somos">
             <p>
-              Endereço de e-mail institucional, nome completo informado no momento do voto, as notas
-              que você deu, a data e hora de cada envio e o número da versão da cédula.
+              Este site é o aplicativo de votação da{' '}
+              <strong className="text-paper">3ª Copa Clandestina de Futsal</strong>, um campeonato
+              entre estudantes do IFBA. É um aplicativo <strong className="text-paper">interno</strong>,
+              feito pela organização do evento, sem fins comerciais ou publicitários. A finalidade é
+              única: coletar as notas dos jogadores (de 1 a 5 estrelas) e montar os 6 times
+              equilibrados da copa.
+            </p>
+            <p>
+              Responsável pelo tratamento dos dados e contato da organização:{' '}
+              <a className="text-gold underline" href="mailto:202111130002@ifba.edu.br">
+                202111130002@ifba.edu.br
+              </a>
+              .
             </p>
           </Block>
 
-          <Block title="Para que serve">
+          <Block title="2. Dados que o login do Google fornece">
             <p>
-              Garantir uma cédula por pessoa, permitir que você edite o próprio voto e dar à
-              organização meios de auditar o processo em caso de contestação.
+              O aplicativo pede acesso apenas à{' '}
+              <strong className="text-paper">identidade básica</strong> da conta Google: nome,
+              endereço de e-mail e foto de perfil. O e-mail é usado para uma única verificação: se a
+              conta termina em <strong className="text-paper">@ifba.edu.br</strong> (público
+              autorizado a votar) e se ela já possui uma cédula — é assim que garantimos{' '}
+              <strong className="text-paper">uma cédula por pessoa</strong>. O nome e a foto servem
+              apenas para indicar quem está conectado na tela do aplicativo.
+            </p>
+            <p>
+              Não acessamos Gmail, Drive, contatos, agenda ou qualquer outro dado da sua conta
+              Google. O aplicativo não usa inteligência artificial para gerar, editar ou publicar
+              conteúdo.
             </p>
           </Block>
 
-          <Block title="Quem vê">
-            <p>
-              Apenas a organização da 3ª Copa Clandestina. O ranking apresentado ao grupo é
-              agregado: médias e contagem de votos, sem associar nota a votante.
+          <Block title="3. Dados guardados na votação">
+            <p>Quando você envia a cédula, guardamos:</p>
+            <ul className="flex flex-col gap-1 pl-5">
+              <li className="list-disc">o endereço de e-mail da conta usada no login;</li>
+              <li className="list-disc">o nome completo informado por você no envio;</li>
+              <li className="list-disc">as notas (1 a 5 estrelas ou “não sei”) dadas a cada jogador;</li>
+              <li className="list-disc">a data e a hora de cada envio;</li>
+              <li className="list-disc">o número da versão da cédula (cada edição gera uma versão).</li>
+            </ul>
+          </Block>
+
+          <Block title="4. Para que usamos">
+            <ul className="flex flex-col gap-1 pl-5">
+              <li className="list-disc">
+                garantir uma cédula por conta e permitir que você edite o voto até o prazo;
+              </li>
+              <li className="list-disc">
+                apurar o ranking interno e dividir os participantes em 6 times equilibrados;
+              </li>
+              <li className="list-disc">auditar o processo em caso de contestação dentro da organização.</li>
+            </ul>
+          </Block>
+
+          <Block title="5. O que este aplicativo não faz">
+            <ul className="flex flex-col gap-1 pl-5">
+              <li className="list-disc">
+                não vende, aluga nem compartilha seus dados com terceiros para publicidade;
+              </li>
+              <li className="list-disc">
+                não exibe anúncios nem rastreia sua navegação fora do aplicativo;
+              </li>
+              <li className="list-disc">
+                não publica notas individuais, identidade de votantes nem o resultado — o ranking é
+                interno da organização;
+              </li>
+              <li className="list-disc">
+                não gera, edita ou publica imagens ou qualquer conteúdo com inteligência artificial.
+              </li>
+            </ul>
+          </Block>
+
+          <Block title="6. Uso das APIs do Google">
+            <p className="rounded-[var(--radius-card)] border border-line bg-surface px-4 py-3">
+              O uso das informações recebidas das APIs do Google por este aplicativo está em
+              conformidade com a{' '}
+              <a
+                className="text-gold underline"
+                href="https://developers.google.com/terms/api-services-user-data-policy"
+                rel="noopener"
+                target="_blank"
+              >
+                Política de Dados do Usuário dos Serviços de API do Google
+              </a>
+              , incluindo os requisitos de Uso Limitado.
             </p>
             <p>
-              Médias de jogadores com pouquíssimos votos ficam frágeis por natureza — por isso a
-              leitura é feita em conjunto, com mediana e abstenções ao lado da média.
+              O único recurso do Google utilizado é o login (OpenID Connect), com os escopos de
+              e-mail e perfil, exclusivamente para autenticação.
             </p>
           </Block>
 
-          <Block title="Por quanto tempo">
+          <Block title="7. Onde os dados ficam">
             <p>
-              Os dados ficam guardados durante a organização da copa e por até 90 dias depois da
-              divulgação dos times, quando são apagados. Para pedir a remoção antes disso, procure a
-              organização.
+              O site é hospedado no <strong className="text-paper">GitHub Pages</strong>; o banco de
+              dados e a autenticação ficam no <strong className="text-paper">Supabase</strong>; o
+              login é processado pelo <strong className="text-paper">Google</strong>. Esses
+              provedores tratam os dados apenas para operar o serviço, conforme as políticas
+              próprias de cada um.
+            </p>
+          </Block>
+
+          <Block title="8. Por quanto tempo">
+            <p>
+              Os dados ficam guardados durante a organização da copa e são apagados{' '}
+              <strong className="text-paper">até 90 dias após a divulgação dos times</strong>. A
+              organização pode apagar uma cédula específica ou todas antes disso — inclusive a seu
+              pedido.
+            </p>
+          </Block>
+
+          <Block title="9. Seus direitos (LGPD)">
+            <p>
+              Você pode pedir, a qualquer momento, informação, correção ou exclusão dos seus dados
+              pelo contato indicado no item 1. Você também pode editar a própria cédula até o prazo
+              final da votação; depois do prazo, a edição fica bloqueada, mas a exclusão continua
+              disponível se solicitada à organização.
+            </p>
+          </Block>
+
+          <Block title="10. Alterações deste aviso">
+            <p>
+              Se este aviso mudar, a data de atualização no topo também muda. Mudanças relevantes
+              são avisadas na página inicial da votação.
             </p>
           </Block>
         </div>

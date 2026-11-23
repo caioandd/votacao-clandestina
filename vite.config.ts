@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync } from 'node:fs'
+import { copyFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -15,8 +15,9 @@ export default defineConfig({
       // GitHub Pages não tem fallback de SPA: o 404.html é servido na rota
       // profunda (ex.: /regulamento) e o roteador resolve o caminho. Como o
       // index.html aponta para os assets com caminho absoluto, a cópia vale.
-      // /privacidade ganha cópia real (status 200): o Google exige que a URL
-      // da Política de Privacidade abra sem erro no cadastro do OAuth.
+      // /privacidade/ é uma página estática de verdade (public/privacidade/),
+      // para que o conteúdo apareça mesmo sem JavaScript — exigência do
+      // cadastro OAuth do Google.
       name: 'gh-pages-404',
       apply: 'build',
       closeBundle() {
@@ -24,8 +25,6 @@ export default defineConfig({
         const index = resolve(dist, 'index.html')
         if (!existsSync(index)) return
         copyFileSync(index, resolve(dist, '404.html'))
-        mkdirSync(resolve(dist, 'privacidade'), { recursive: true })
-        copyFileSync(index, resolve(dist, 'privacidade', 'index.html'))
       },
     },
   ],

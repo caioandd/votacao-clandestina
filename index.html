@@ -11,7 +11,7 @@
     <title>Votação · 3ª Copa Clandestina de Futsal</title>
     <meta
       name="description"
-      content="Votação oficial da 3ª Copa Clandestina de Futsal. Dê uma nota de 1 a 5 para cada jogador. A organização usa as notas para equilibrar os 6 times."
+      content="Aplicativo interno de votação da 3ª Copa Clandestina de Futsal, campeonato entre estudantes do IFBA. Dê uma nota de 1 a 5 para cada jogador; a organização usa as notas para equilibrar os 6 times. Acesso restrito a e-mail @ifba.edu.br."
     />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="3ª Copa Clandestina · Votação" />
@@ -37,6 +37,46 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Conteúdo sem JavaScript: além de útil para quem tem JS desativado, garante
+         que robôs de revisão (cadastro OAuth do Google) leiam o propósito do app
+         mesmo sem executar o JavaScript da página. -->
+    <noscript>
+      <main
+        style="
+          max-width: 720px;
+          margin: 0 auto;
+          padding: 48px 20px 72px;
+          background: #0e0e10;
+          color: #b5b5ba;
+          font-family: Inter, system-ui, sans-serif;
+          line-height: 1.6;
+        "
+      >
+        <p style="color: #f6c400; font-size: 12px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; margin: 0">
+          Votação oficial · 3ª Copa Clandestina de Futsal
+        </p>
+        <h1 style="font-family: Anton, Inter, sans-serif; font-weight: 400; color: #fff; font-size: 34px; line-height: 1.05; margin: 14px 0 12px">
+          Aplicativo de votação da 3ª Copa Clandestina de Futsal
+        </h1>
+        <p style="margin: 0 0 12px">
+          Este é o aplicativo <strong style="color: #fff">interno e sem fins comerciais</strong> da
+          organização da 3ª Copa Clandestina de Futsal, um campeonato entre estudantes do IFBA. Ele
+          tem uma única finalidade: coletar as notas dos jogadores (de 1 a 5 estrelas) e montar os
+          6 times equilibrados da copa.
+        </p>
+        <p style="margin: 0 0 12px">
+          O login com o Google é restrito a contas com e-mail institucional
+          <strong style="color: #fff">@ifba.edu.br</strong> e serve apenas para confirmar esse
+          e-mail e garantir uma cédula por pessoa. O aplicativo não exibe anúncios, não rastreia
+          você fora da votação e não gera, edita ou publica conteúdo com inteligência artificial.
+        </p>
+        <p style="margin: 0">
+          Ative o JavaScript para votar. Saiba mais na
+          <a style="color: #f6c400" href="./privacidade/">Política de Privacidade</a> e no
+          <a style="color: #f6c400" href="./regulamento">Regulamento da votação</a>.
+        </p>
+      </main>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

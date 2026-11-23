@@ -182,6 +182,14 @@ export function Landing() {
               Uma cédula por conta IFBA: dê as notas, a organização soma tudo e volta com os 6
               times equilibrados. O resultado é só da organização — nunca é público.
             </p>
+            <p>
+              Este é o aplicativo interno e sem fins comerciais da organização da 3ª Copa
+              Clandestina de Futsal, um campeonato entre estudantes do IFBA. O login com o Google
+              serve apenas para confirmar o e-mail institucional{' '}
+              <strong>@ifba.edu.br</strong> e garantir uma cédula por pessoa — não usamos a conta
+              para nenhuma outra finalidade, não exibimos anúncios e não geramos conteúdo com
+              inteligência artificial.
+            </p>
           </div>
 
           <ol className="steps grid">

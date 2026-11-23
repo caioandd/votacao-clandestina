@@ -66,14 +66,17 @@ export function Admin() {
     () => async () => {
       setLoading(true)
       try {
-        const [rows, list, roster] = await Promise.all([
-          data.getRanking(),
-          data.listBallots(),
-          data.listAllPlayers(),
-        ])
+        const [rows, list] = await Promise.all([data.getRanking(), data.listBallots()])
         setRanking(rows)
         setBallots(list)
-        setAdminPlayers(roster)
+        try {
+          setAdminPlayers(await data.listAllPlayers())
+        } catch {
+          // Banco ainda sem a migration 003 (admin_players): o painel segue
+          // funcionando com os jogadores ativos; desativar/reativar avisa erro.
+          const active = await data.listPlayers()
+          setAdminPlayers(active.map((player) => ({ ...player, active: true })))
+        }
       } catch (error) {
         setMessage(error instanceof Error ? error.message : 'Falha ao carregar o painel.')
       } finally {

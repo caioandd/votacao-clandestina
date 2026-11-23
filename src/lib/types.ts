@@ -6,6 +6,16 @@ export type Player = {
   sortOrder: number
 }
 
+/** Linha do painel (Ajustes): inclui desativados; a votação só usa os ativos. */
+export type AdminPlayerRow = {
+  id: string
+  fullName: string
+  nickname: string | null
+  isGoalkeeper: boolean
+  active: boolean
+  sortOrder: number
+}
+
 export type SessionUser = {
   id: string
   email: string
@@ -73,6 +83,8 @@ export type DataAdapter = {
   onAuthChange: (cb: (user: SessionUser | null) => void) => () => void
   getPublicState: () => Promise<PublicState>
   listPlayers: () => Promise<Player[]>
+  /** Painel: todos os jogadores, inclusive os desativados. */
+  listAllPlayers: () => Promise<AdminPlayerRow[]>
   getMyBallot: () => Promise<Ballot | null>
   submitBallot: (
     fullName: string,
@@ -82,6 +94,8 @@ export type DataAdapter = {
   getRanking: () => Promise<RankingRow[]>
   listBallots: () => Promise<AdminBallot[]>
   setGoalkeeper: (playerId: string, value: boolean) => Promise<void>
+  /** Painel: desativa/reativa um jogador (desistência). */
+  setPlayerActive: (playerId: string, value: boolean) => Promise<void>
   addPlayer: (fullName: string, nickname: string | null, isGoalkeeper: boolean) => Promise<void>
   setDeadline: (isoDate: string) => Promise<void>
   deleteBallot: (ballotId: string) => Promise<void>

@@ -3,7 +3,7 @@ import { AppShell, PageContainer, DemoBadge } from '../components/Layout'
 import { Button, Kicker, Spinner } from '../components/ui'
 import { useApp } from '../state/AppProvider'
 import { data } from '../lib/data'
-import type { AdminBallot, RankingRow } from '../lib/types'
+import type { AdminBallot, AdminPlayerRow, RankingRow } from '../lib/types'
 import { copyText, downloadFile } from '../lib/csv'
 import {
   exportTeamsCsv,
@@ -58,6 +58,7 @@ export function Admin() {
   const [tab, setTab] = useState<Tab>('ranking')
   const [ranking, setRanking] = useState<RankingRow[]>([])
   const [ballots, setBallots] = useState<AdminBallot[]>([])
+  const [adminPlayers, setAdminPlayers] = useState<AdminPlayerRow[]>([])
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState<string | null>(null)
 
@@ -65,9 +66,14 @@ export function Admin() {
     () => async () => {
       setLoading(true)
       try {
-        const [rows, list] = await Promise.all([data.getRanking(), data.listBallots()])
+        const [rows, list, roster] = await Promise.all([
+          data.getRanking(),
+          data.listBallots(),
+          data.listAllPlayers(),
+        ])
         setRanking(rows)
         setBallots(list)
+        setAdminPlayers(roster)
       } catch (error) {
         setMessage(error instanceof Error ? error.message : 'Falha ao carregar o painel.')
       } finally {
@@ -105,6 +111,7 @@ export function Admin() {
   }
 
   const totalBallots = ballots.length
+  const inactiveCount = adminPlayers.filter((player) => !player.active).length
 
   return (
     <AppShell
@@ -128,7 +135,10 @@ export function Admin() {
             </h1>
             <p className="tnum text-[13px] text-ash">
               {totalBallots} {totalBallots === 1 ? 'cédula registrada' : 'cédulas registradas'} ·{' '}
-              {players.length} jogadores
+              {players.length} {players.length === 1 ? 'jogador ativo' : 'jogadores ativos'}
+              {inactiveCount
+                ? ` · ${inactiveCount} ${inactiveCount === 1 ? 'inativo' : 'inativos'}`
+                : null}
               {publicState ? ` · fecha ${formatDateTime(publicState.closesAt)}` : null}
             </p>
           </header>
@@ -240,7 +250,7 @@ export function Admin() {
 
               {tab === 'ajustes' ? (
                 <SettingsTab
-                  players={players}
+                  players={adminPlayers}
                   closesAt={publicState?.closesAt ?? ''}
                   onChange={async () => {
                     await refresh()
@@ -652,7 +662,7 @@ function SettingsTab({
   onChange,
   onMessage,
 }: {
-  players: { id: string; fullName: string; nickname: string | null; isGoalkeeper: boolean }[]
+  players: AdminPlayerRow[]
   closesAt: string
   onChange: () => Promise<void>
   onMessage: (message: string | null) => void
@@ -662,6 +672,8 @@ function SettingsTab({
   const [newNick, setNewNick] = useState('')
   const [newGk, setNewGk] = useState(false)
   const [busy, setBusy] = useState(false)
+
+  const activePlayers = players.filter((player) => player.active)
 
   useEffect(() => {
     if (closesAt) setDeadline(toLocalInputValue(closesAt))
@@ -709,10 +721,11 @@ function SettingsTab({
       <div className="flex flex-col gap-3">
         <h2 className="text-[16px] font-semibold text-paper">Quem é goleiro</h2>
         <p className="text-[13px] text-ash-600">
-          Goleiros votam normalmente, mas ficam fora da divisão dos 6 times.
+          Goleiros votam normalmente, mas ficam fora da divisão dos 6 times. Só jogadores ativos
+          aparecem aqui.
         </p>
         <div className="flex flex-col gap-1.5">
-          {players.map((player) => (
+          {activePlayers.map((player) => (
             <label
               key={player.id}
               className="flex items-center justify-between gap-3 rounded-[var(--radius-chip)] border border-line bg-surface px-4 py-2.5"
@@ -733,6 +746,64 @@ function SettingsTab({
                     `${player.fullName} atualizado.`,
                   )
                 }
+                className="h-5 w-5 accent-gold"
+              />
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="text-[16px] font-semibold text-paper">Ativos na votação</h2>
+        <p className="text-[13px] text-ash-600">
+          Use quando alguém desistir: desmarque para o jogador sair da votação e do ranking. Os
+          votos que ele já recebeu ficam guardados — se ele voltar, é só marcar de novo, e quem já
+          votou passa a vê-lo como “não sei” para completar até o prazo.
+        </p>
+        <div className="flex flex-col gap-1.5">
+          {players.map((player) => (
+            <label
+              key={player.id}
+              className={cn(
+                'flex items-center justify-between gap-3 rounded-[var(--radius-chip)] border border-line bg-surface px-4 py-2.5',
+                !player.active && 'opacity-60',
+              )}
+            >
+              <span className="text-[14px] text-paper">
+                {player.fullName}
+                {player.nickname ? (
+                  <span className="ml-2 text-[12px] text-ash-600">{player.nickname}</span>
+                ) : null}
+                {!player.active ? (
+                  <span className="ml-2 text-[12px] text-ash-600">inativo</span>
+                ) : null}
+              </span>
+              <input
+                type="checkbox"
+                checked={player.active}
+                disabled={busy}
+                title={
+                  player.active
+                    ? 'Desmarcar tira o jogador da votação'
+                    : 'Marcar devolve o jogador à votação'
+                }
+                onChange={(event) => {
+                  const value = event.target.checked
+                  if (
+                    !value &&
+                    !window.confirm(
+                      `${player.fullName} sai da votação e do ranking. Os votos já recebidos ficam guardados. Desativar?`,
+                    )
+                  ) {
+                    return
+                  }
+                  void run(
+                    () => data.setPlayerActive(player.id, value),
+                    value
+                      ? `${player.fullName} voltou para a votação.`
+                      : `${player.fullName} saiu da votação.`,
+                  )
+                }}
                 className="h-5 w-5 accent-gold"
               />
             </label>

@@ -2,6 +2,7 @@ import { ROSTER } from '../roster'
 import { createPublicState } from '../deadline'
 import type {
   AdminBallot,
+  AdminPlayerRow,
   Ballot,
   DataAdapter,
   Player,
@@ -28,8 +29,11 @@ type DemoBallot = {
   scores: Record<string, number | null>
 }
 
+/** Jogador no demo carrega o mesmo flag `active` do banco (ausente = ativo). */
+type DemoPlayer = Player & { active?: boolean }
+
 type DemoStore = {
-  players: Player[]
+  players: DemoPlayer[]
   ballots: DemoBallot[]
   opensAt: string
   closesAt: string
@@ -42,13 +46,14 @@ const DEMO_USER: SessionUser = {
   avatarUrl: null,
 }
 
-function defaultPlayers(): Player[] {
+function defaultPlayers(): DemoPlayer[] {
   return ROSTER.map((entry) => ({
     id: `p-${String(entry.n).padStart(2, '0')}`,
     fullName: entry.name,
     nickname: entry.nick ?? null,
     isGoalkeeper: entry.goalkeeper ?? false,
     sortOrder: entry.n,
+    active: true,
   }))
 }
 
@@ -139,14 +144,31 @@ export function createDemoAdapter(): DataAdapter {
       return createPublicState({
         opensAt: store.opensAt,
         closesAt: store.closesAt,
-        playerCount: store.players.length,
+        playerCount: store.players.filter((player) => player.active !== false).length,
       })
     },
 
     async listPlayers() {
-      return [...getStore().players].sort(
-        (a, b) => a.fullName.localeCompare(b.fullName, 'pt-BR') || a.sortOrder - b.sortOrder,
-      )
+      return [...getStore().players]
+        .filter((player) => player.active !== false)
+        .sort(
+          (a, b) => a.fullName.localeCompare(b.fullName, 'pt-BR') || a.sortOrder - b.sortOrder,
+        )
+    },
+
+    async listAllPlayers(): Promise<AdminPlayerRow[]> {
+      return [...getStore().players]
+        .sort(
+          (a, b) => a.fullName.localeCompare(b.fullName, 'pt-BR') || a.sortOrder - b.sortOrder,
+        )
+        .map((player) => ({
+          id: player.id,
+          fullName: player.fullName,
+          nickname: player.nickname,
+          isGoalkeeper: player.isGoalkeeper,
+          active: player.active !== false,
+          sortOrder: player.sortOrder,
+        }))
     },
 
     async getMyBallot(): Promise<Ballot | null> {
@@ -192,7 +214,9 @@ export function createDemoAdapter(): DataAdapter {
 
     async getRanking(): Promise<RankingRow[]> {
       const store = getStore()
-      const rows = store.players.map((player) => {
+      const rows = store.players
+        .filter((player) => player.active !== false)
+        .map((player) => {
         const values: number[] = []
         let abstentions = 0
         const distribution: Record<string, number> = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 }
@@ -260,6 +284,20 @@ export function createDemoAdapter(): DataAdapter {
       save(store)
     },
 
+    async setPlayerActive(playerId, value) {
+      const store = getStore()
+      const player = store.players.find((p) => p.id === playerId)
+      if (!player) return
+      player.active = value
+      // Espelha o banco: ao reativar, quem já votou passa a ver o jogador como "não sei".
+      if (value) {
+        for (const ballot of store.ballots) {
+          if (!(player.id in ballot.scores)) ballot.scores[player.id] = null
+        }
+      }
+      save(store)
+    },
+
     async addPlayer(fullName, nickname, isGoalkeeper) {
       const store = getStore()
       const nextOrder = Math.max(0, ...store.players.map((p) => p.sortOrder)) + 1
@@ -300,10 +338,11 @@ export function createDemoAdapter(): DataAdapter {
     async seedDemoBallots(count) {
       const store = getStore()
       store.ballots = []
+      const activePlayers = store.players.filter((player) => player.active !== false)
       // "habilidade" escondida por jogador, para o ranking ficar verossímil
       const skill = new Map<string, number>()
-      store.players.forEach((player, index) => {
-        const base = 5.1 - (index / store.players.length) * 3.1
+      activePlayers.forEach((player, index) => {
+        const base = 5.1 - (index / activePlayers.length) * 3.1
         skill.set(player.id, Math.min(5, Math.max(1, base)))
       })
       const names = [
@@ -342,7 +381,7 @@ export function createDemoAdapter(): DataAdapter {
 
       for (let i = 0; i < Math.min(count, names.length); i += 1) {
         const scores: Record<string, number | null> = {}
-        for (const player of store.players) {
+        for (const player of activePlayers) {
           if (random() < 0.18) {
             scores[player.id] = null
             continue

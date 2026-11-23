@@ -44,6 +44,11 @@ teste* → aba **Times** → *Gerar 6 times*.
    e clique em **Run**. Isso cria as tabelas, as regras de acesso (RLS), as funções
    de votação e a lista dos 30 jogadores.
    - Pode rodar de novo sem medo: não duplica jogadores nem apaga votos.
+   - Depois da inicial, rode também (na ordem) o
+     [`20261122000200_admin_limpar_votos_nota.sql`](supabase/migrations/20261122000200_admin_limpar_votos_nota.sql)
+     (coluna *nota* do painel + limpar votos) e o
+     [`20261124000100_admin_desativar_jogador.sql`](supabase/migrations/20261124000100_admin_desativar_jogador.sql)
+     (desativar/reativar jogador). Todos são idempotentes.
 3. Em **Project Settings → API**, copie:
    - **Project URL** → `VITE_SUPABASE_URL`
    - a chave pública → `VITE_SUPABASE_ANON_KEY` (no projeto novo ela aparece como
@@ -142,10 +147,15 @@ Tudo em `#/admin`:
 | **Ranking** | Nota (estrela mais votada), média, mediana, votos e “não sei” de cada jogador. Toque no nome para abrir a tabela por estrela. CSV para planilha. |
 | **Times** | Gera 6 times equilibrados, permite trocas manuais e exporta texto para WhatsApp + CSV. |
 | **Cédulas** | Quem já votou (nome, e-mail, versão, horário), apagar uma cédula e a caixa **Limpar votos** (apaga todas, pedindo confirmação). |
-| **Ajustes** | Prazo final, marcar goleiros, adicionar jogador. |
+| **Ajustes** | Prazo final, marcar goleiros, ativar/desativar jogadores, adicionar jogador. |
 
 **Marcar goleiros** (Ajustes): goleiros votam normalmente, mas ficam fora da
 divisão dos times. Marque cada um antes de gerar.
+
+**Desativar jogador** (Ajustes): use quando alguém desistir. O jogador sai da
+votação e do ranking, mas os votos já recebidos ficam guardados; se ele voltar,
+basta marcar de novo — quem já votou passa a vê-lo como “não sei” e pode
+completar até o prazo.
 
 **Adicionar o 30º jogador** (Ajustes): quem já votou passa a ver o jogador novo
 como “não sei” e pode editar o voto até o prazo.
@@ -205,7 +215,8 @@ instrução de abrir no Safari (iPhone).
 uso. Com a votação correndo isso não acontece; depois da copa, exporte os dados.
 
 **Quero mudar a lista de jogadores** — só pelo painel (Ajustes) e só antes de
-fechar. Depois do prazo, a lista deve ficar congelada.
+fechar. Jogador que desistir: desmarque em **Ativos na votação** (os votos dele
+ficam guardados). Depois do prazo, a lista deve ficar congelada.
 
 ---
 

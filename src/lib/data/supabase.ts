@@ -1,6 +1,7 @@
 import { createClient, type User } from '@supabase/supabase-js'
 import type {
   AdminBallot,
+  AdminPlayerRow,
   Ballot,
   DataAdapter,
   Player,
@@ -25,6 +26,7 @@ const MESSAGES: Record<string, string> = {
   email_domain_not_allowed: 'Acesso restrito ao e-mail institucional @ifba.edu.br.',
   not_authenticated: 'Entre com o Google para continuar.',
   not_admin: 'Esta conta não tem permissão da organização.',
+  player_not_found: 'Jogador não encontrado na lista.',
 }
 
 function friendly(message?: string, fallback = 'Não foi possível concluir. Tente de novo.') {
@@ -130,6 +132,20 @@ export function createSupabaseAdapter(url: string, anonKey: string): DataAdapter
       }))
     },
 
+    async listAllPlayers(): Promise<AdminPlayerRow[]> {
+      const { data, error } = await supabase.rpc('admin_players')
+      if (error) throw new Error(friendly(error.message))
+      const rows = (data ?? []) as Record<string, unknown>[]
+      return rows.map((row) => ({
+        id: String(row.id),
+        fullName: String(row.full_name),
+        nickname: row.nickname ? String(row.nickname) : null,
+        isGoalkeeper: Boolean(row.is_goalkeeper),
+        active: Boolean(row.active),
+        sortOrder: Number(row.sort_order ?? 0),
+      }))
+    },
+
     async getMyBallot(): Promise<Ballot | null> {
       const { data, error } = await supabase.rpc('get_my_ballot')
       if (error) throw new Error(friendly(error.message))
@@ -194,6 +210,14 @@ export function createSupabaseAdapter(url: string, anonKey: string): DataAdapter
 
     async setGoalkeeper(playerId, value) {
       const { error } = await supabase.rpc('admin_set_goalkeeper', {
+        p_player_id: playerId,
+        p_value: value,
+      })
+      if (error) throw new Error(friendly(error.message))
+    },
+
+    async setPlayerActive(playerId, value) {
+      const { error } = await supabase.rpc('admin_set_player_active', {
         p_player_id: playerId,
         p_value: value,
       })

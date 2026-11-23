@@ -691,6 +691,7 @@ function SettingsTab({
       onMessage(okMessage)
     } catch (error) {
       onMessage(error instanceof Error ? error.message : 'Não foi possível salvar.')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     } finally {
       setBusy(false)
     }

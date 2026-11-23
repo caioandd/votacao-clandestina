@@ -27,6 +27,8 @@ const MESSAGES: Record<string, string> = {
   not_authenticated: 'Entre com o Google para continuar.',
   not_admin: 'Esta conta não tem permissão da organização.',
   player_not_found: 'Jogador não encontrado na lista.',
+  'Could not find the function':
+    'O banco do site ainda não tem esta ação. Rode as migrations 002 e 003 no Supabase (painel → SQL Editor) e tente de novo.',
 }
 
 function friendly(message?: string, fallback = 'Não foi possível concluir. Tente de novo.') {

@@ -1,17 +1,18 @@
-import { Link, Navigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { AppShell, PageContainer } from '../components/Layout'
 import { ScoreDisplay } from '../components/ScoreDisplay'
 import { Button, Kicker } from '../components/ui'
+import { Splash } from './guards'
 import { useApp } from '../state/AppProvider'
 import { loadDraft } from '../hooks/useDraft'
 import { formatDateTime } from '../lib/deadline'
 
 export function Closed() {
-  const { session, players, ballot } = useApp()
+  const { booting, players, ballot, voterId } = useApp()
 
-  if (!session) return <Navigate to="/" replace />
+  if (booting) return <Splash />
 
-  const draft = loadDraft(session.id)
+  const draft = voterId ? loadDraft(voterId) : null
   const scores = ballot?.scores ?? draft?.scores ?? {}
 
   return (

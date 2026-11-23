@@ -1,18 +1,20 @@
 # Votação · 3ª Copa Clandestina de Futsal
 
-Sistema de votação da 3ª Copa Clandestina. Cada pessoa entra com a conta Google
-institucional (`@ifba.edu.br`), informa o nome completo e dá uma nota de 1 a 5
-estrelas — ou marca **“Não sei”** — para cada jogador da lista.
+Sistema de votação da 3ª Copa Clandestina. Quem vota **não faz login**: na entrada,
+escreve o nome completo, que fica salvo num **cookie do aparelho**, e dá uma nota de
+1 a 5 estrelas — ou marca **“Não sei”** — para cada jogador da lista.
 
 A organização usa as notas para montar **6 times equilibrados**. O ranking é
-interno: nenhum votante vê a nota do outro.
+interno: nenhum votante vê a nota do outro. O logar com Google é só da
+organização, para abrir o painel (`#/admin`).
 
 | | |
 |---|---|
 | Site | GitHub Pages (estático) |
-| Login e banco | Supabase (Postgres + Google OAuth) |
+| Banco | Supabase (Postgres) |
+| Login | Só a organização (Google). Votantes usam cookie do aparelho |
 | Prazo padrão | 25/11/2026 às 23:59 (America/Bahia) |
-| Votação | 1 cédula por conta, editável até o prazo |
+| Votação | 1 cédula por aparelho, editável até o prazo |
 | Resultado | Só no painel da organização (`#/admin`) |
 
 ---
@@ -46,9 +48,11 @@ teste* → aba **Times** → *Gerar 6 times*.
    - Pode rodar de novo sem medo: não duplica jogadores nem apaga votos.
    - Depois da inicial, rode também (na ordem) o
      [`20261122000200_admin_limpar_votos_nota.sql`](supabase/migrations/20261122000200_admin_limpar_votos_nota.sql)
-     (coluna *nota* do painel + limpar votos) e o
+     (coluna *nota* do painel + limpar votos), o
      [`20261124000100_admin_desativar_jogador.sql`](supabase/migrations/20261124000100_admin_desativar_jogador.sql)
-     (desativar/reativar jogador). Todos são idempotentes.
+     (desativar/reativar jogador) e o
+     [`20261124000200_voto_por_cookie.sql`](supabase/migrations/20261124000200_voto_por_cookie.sql)
+     (voto por cookie, sem login para quem vota). Todos são idempotentes.
 3. Em **Project Settings → API**, copie:
    - **Project URL** → `VITE_SUPABASE_URL`
    - a chave pública → `VITE_SUPABASE_ANON_KEY` (no projeto novo ela aparece como
@@ -68,7 +72,10 @@ cp .env.example .env.local
 
 ---
 
-## 3. Ligar o login do Google
+## 3. Ligar o login do Google (só para a organização)
+
+Quem vota não passa por aqui. O Google é usado apenas pelas contas da
+organização, para abrir o painel `#/admin`.
 
 ### 3.1 No Google Cloud Console
 
@@ -77,9 +84,10 @@ cp .env.example .env.local
    - Tipo: **Externo** · Nome do app: `Votação 3ª Copa Clandestina`
    - E-mail de suporte e de contato: o seu
    - Escopos: `.../auth/userinfo.email`, `.../auth/userinfo.profile`, `openid`
-   - Usuários de teste: adicione o seu e-mail e o da organização
-   - **Publique o app** (botão *Publicar aplicativo*). Os escopos acima são
-     básicos: não exigem revisão do Google e liberam o login para qualquer conta.
+   - Usuários de teste: adicione o seu e-mail e o da organização (só essas
+     contas conseguem logar enquanto o app não estiver publicado)
+   - **Publique o app** (botão *Publicar aplicativo*) para liberar de vez. Os
+     escopos acima são básicos: não exigem revisão do Google.
 3. **APIs e serviços → Credenciais → Criar credenciais → ID do cliente OAuth**:
    - Tipo: **Aplicativo da Web**
    - Origens JavaScript autorizadas: `https://SEU-USUARIO.github.io`
@@ -146,7 +154,7 @@ Tudo em `#/admin`:
 |---|---|
 | **Ranking** | Nota (estrela mais votada), média, mediana, votos e “não sei” de cada jogador. Toque no nome para abrir a tabela por estrela. CSV para planilha. |
 | **Times** | Gera 6 times equilibrados, permite trocas manuais e exporta texto para WhatsApp + CSV. |
-| **Cédulas** | Quem já votou (nome, e-mail, versão, horário), apagar uma cédula e a caixa **Limpar votos** (apaga todas, pedindo confirmação). |
+| **Cédulas** | Quem já votou (nome, aparelho, versão, horário), apagar uma cédula e a caixa **Limpar votos** (apaga todas, pedindo confirmação). |
 | **Ajustes** | Prazo final, marcar goleiros, ativar/desativar jogadores, adicionar jogador. |
 
 **Marcar goleiros** (Ajustes): goleiros votam normalmente, mas ficam fora da
@@ -175,6 +183,7 @@ backup.
 ```
 players   (id, full_name, nickname, is_goalkeeper, sort_order, active)
 ballots   (id, voter_id único, full_name, revision, submitted_at, updated_at)
+          -- voter_id = identificador do aparelho (cookie) ou da conta antiga
 ratings   (ballot_id, player_id, score 1..5 ou null)   -- null = "não sei"
 settings  (opens_at, closes_at, results_public)
 admins    (user_id)
@@ -182,10 +191,11 @@ admins    (user_id)
 
 Regras garantidas pelo banco:
 
-- Só e-mail `@ifba.edu.br` verificado no Google lê a lista ou vota.
-- Uma cédula por conta; cada envio incrementa `revision`.
-- Escrita das notas **só** pela função `submit_ballot`, que valida janela de
-  votação, nome, lista completa e intervalo das notas.
+- Quem vota não precisa de conta: o cookie do aparelho identifica a cédula.
+- Uma cédula por aparelho; cada envio incrementa `revision`.
+- Escrita das notas **só** pelas funções `voter_submit_ballot` (cookie) e
+  `submit_ballot` (conta antiga, para as cédulas de antes), que validam janela
+  de votação, nome, lista completa e intervalo das notas.
 - Trigger de defesa bloqueia escrita fora do prazo mesmo em chamadas diretas.
 - Ranking exposto apenas para quem está em `admins`.
 
@@ -204,12 +214,16 @@ nome do jogador.
 
 ## 8. Problemas comuns
 
-**“Acesso restrito ao e-mail institucional”** — a conta usada não é
-`@ifba.edu.br`. Use *Trocar de conta*.
+**“Painel restrito”** — a conta Google usada não está na lista da organização.
+Use *Trocar de conta* (ou *Entrar com Google*, se ninguém entrou ainda).
 
-**Login não abre no WhatsApp** — o navegador interno do WhatsApp bloqueia o
-Google. A capa detecta isso e mostra o botão *Abrir no Chrome* (Android) ou a
-instrução de abrir no Safari (iPhone).
+**Alguém já votou neste aparelho e outra pessoa quer votar** — na entrada (ou no
+botão *Trocar de pessoa* dentro da votação), confirme *Trocar de pessoa*. A
+cédula anterior continua registrada; a nova pessoa começa uma cédula nova.
+
+**Trocar de aparelho ou limpar o navegador** — o cookie se perde e a pessoa
+passa a votar como cédula nova (a antiga fica guardada). Se aparecer cédula
+repetida no painel, apague a que não interessa em **Cédulas**.
 
 **Supabase pausa o projeto** — planos gratuitos pausam após cerca de 7 dias sem
 uso. Com a votação correndo isso não acontece; depois da copa, exporte os dados.

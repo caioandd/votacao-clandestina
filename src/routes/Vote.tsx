@@ -12,12 +12,11 @@ import { answeredCount, missingCount } from '../lib/validation'
 import { formatShortDeadline } from '../lib/deadline'
 
 export function Vote() {
-  const { session, players, ballot, publicState, phase, signOut, refresh } = useApp()
+  const { voterId, voterName, players, ballot, publicState, phase, loadError, refresh } = useApp()
   const now = useNow(1000)
   const navigate = useNavigate()
   const [scores, setScores] = useState<Record<string, number | null>>({})
   const [ready, setReady] = useState(false)
-  const [draftName, setDraftName] = useState('')
 
   // Ao entrar na tela, revalida jogadores e cédula: um jogador desativado pela
   // organização some daqui mesmo que a página já estivesse aberta antes.
@@ -26,16 +25,15 @@ export function Vote() {
   }, [refresh])
 
   useEffect(() => {
-    if (ready || !session || !publicState) return
-    const draft = loadDraft(session.id)
+    if (ready || !voterId || !publicState) return
+    const draft = loadDraft(voterId)
     const serverTime = ballot ? new Date(ballot.updatedAt).getTime() : 0
     const useDraft = Boolean(draft && draft.updatedAt > serverTime)
     setScores(useDraft && draft ? draft.scores : (ballot?.scores ?? {}))
-    setDraftName(
-      (useDraft && draft?.fullName) || ballot?.fullName || session.displayName || '',
-    )
     setReady(true)
-  }, [ready, session, publicState, ballot])
+  }, [ready, voterId, publicState, ballot])
+
+  const draftName = ballot?.fullName ?? voterName ?? ''
 
   const answered = useMemo(() => answeredCount(players, scores), [players, scores])
   const missing = useMemo(() => missingCount(players, scores), [players, scores])
@@ -44,7 +42,7 @@ export function Vote() {
   if (phase === 'closed') return <Navigate to="/encerrada" replace />
 
   function handleChange(playerId: string, value: Rating) {
-    if (!session) return
+    if (!voterId) return
     setScores((previous) => {
       const next = { ...previous }
       if (value === undefined) {
@@ -52,7 +50,7 @@ export function Vote() {
       } else {
         next[playerId] = value
       }
-      saveDraft(session.id, { fullName: draftName, scores: next, updatedAt: Date.now() })
+      saveDraft(voterId, { fullName: draftName, scores: next, updatedAt: Date.now() })
       return next
     })
   }
@@ -66,10 +64,10 @@ export function Vote() {
             variant="quiet"
             size="sm"
             onClick={() => {
-              void signOut()
+              navigate('/entrar')
             }}
           >
-            Sair
+            Trocar de pessoa
           </Button>
         </>
       }
@@ -93,6 +91,12 @@ export function Vote() {
               </p>
             ) : null}
           </header>
+
+          {loadError ? (
+            <div className="rounded-[var(--radius-card)] border border-crimson/50 bg-crimson/10 px-4 py-3 text-[13px] leading-relaxed text-crimson">
+              {loadError}
+            </div>
+          ) : null}
 
           <section aria-label="Lista de jogadores" className="flex flex-col gap-2.5">
             {players.map((player) => (

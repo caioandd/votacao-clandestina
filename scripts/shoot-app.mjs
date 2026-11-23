@@ -44,31 +44,38 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 /* ------------------------------------------------------------------ seeds */
 
+// O votante do QA é um "aparelho" (cookie) — igual ao fluxo real.
+const VOTER_ID = 'qa-aparelho-0001'
+const SET_COOKIE = `document.cookie = 'cd_voter_v1=' + encodeURIComponent(JSON.stringify({ id: '${VOTER_ID}', name: 'Caio Andrade' })) + '; Max-Age=31536000; Path=/'`
+
 const BOOT = `
 (async () => {
   const { createDemoAdapter } = await import('/src/lib/data/demo.ts')
   const adapter = createDemoAdapter()
   await adapter.resetDemo()
-  await adapter.signIn()
+  document.cookie = 'cd_voter_v1=; Max-Age=0; Path=/'
   __RESULT__ = { ok: true }
 })().catch((e) => { __RESULT__ = { error: String(e) } })
 `
 
 const SEED_DRAFT = BOOT.replace('__RESULT__ = { ok: true }', `
+  ${SET_COOKIE}
   const players = await adapter.listPlayers()
   const scores = {}
   players.forEach((p, i) => { if (i < 6) scores[p.id] = [5, 4, 3, null, 5, 2][i] })
-  localStorage.setItem('cd_draft_v1_demo-user-0001', JSON.stringify({ fullName: 'Caio Andrade', scores, updatedAt: Date.now() }))
+  localStorage.setItem('cd_draft_v1_${VOTER_ID}', JSON.stringify({ fullName: 'Caio Andrade', scores, updatedAt: Date.now() }))
   __RESULT__ = { players: players.length, answered: Object.keys(scores).length }`)
 
 const SEED_SUBMITTED = BOOT.replace('__RESULT__ = { ok: true }', `
+  ${SET_COOKIE}
   const players = await adapter.listPlayers()
   const scores = {}
   players.forEach((p, i) => { scores[p.id] = i % 7 === 3 ? null : 2 + ((i * 3) % 4) })
-  const res = await adapter.submitBallot('Caio Andrade', scores)
+  const res = await adapter.submitBallot('${VOTER_ID}', 'Caio Andrade', scores)
   __RESULT__ = { revision: res.revision }`)
 
 const SEED_BALLOTS = BOOT.replace('__RESULT__ = { ok: true }', `
+  await adapter.signIn()
   await adapter.seedDemoBallots(24)
   __RESULT__ = { ballots: (await adapter.listBallots()).length }`)
 
@@ -77,8 +84,9 @@ const clickHas = (t) => `{ const btn = [...document.querySelectorAll('button')].
 const pause = (ms) => `; await new Promise((r) => setTimeout(r, ${ms}));`
 
 const PRESETS = {
-  landing: { path: '/' },
+  landing: { path: '/', seed: BOOT },
   identificar: { path: '/entrar', seed: BOOT },
+  'identificar-salvo': { path: '/entrar', seed: SEED_DRAFT },
   votar: { path: '/votar', seed: SEED_DRAFT },
   revisar: { path: '/revisar', seed: SEED_DRAFT },
   enviado: { path: '/enviado', seed: SEED_SUBMITTED },
@@ -86,6 +94,7 @@ const PRESETS = {
   regulamento: { path: '/regulamento' },
   privacidade: { path: '/privacidade' },
   admin: { path: '/admin', seed: SEED_BALLOTS },
+  'admin-porta': { path: '/admin', seed: BOOT },
   ranking: { path: '/admin', seed: SEED_BALLOTS, act: click('Ranking') + pause(300) },
   times: {
     path: '/admin',
@@ -95,7 +104,6 @@ const PRESETS = {
   cedulas: { path: '/admin', seed: SEED_BALLOTS, act: click('Cédulas') + pause(300) },
   ajustes: { path: '/admin', seed: SEED_BALLOTS, act: click('Ajustes') + pause(300) },
 }
-
 const preset = PRESETS[route]
 if (!preset) {
   console.error(`rota desconhecida: ${route}\nopções: ${Object.keys(PRESETS).join(', ')}`)

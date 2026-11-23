@@ -6,7 +6,6 @@ import { DemoBadge } from '../components/Layout'
 import { useApp } from '../state/AppProvider'
 import { useNow } from '../hooks/useNow'
 import { countdownTo, formatCountdown, formatShortDeadline } from '../lib/deadline'
-import { chromeIntentUrl, isAndroid, isInAppBrowser } from '../lib/browser'
 import { data } from '../lib/data'
 
 /**
@@ -36,7 +35,7 @@ function useMoment(ref: RefObject<HTMLElement | null>) {
 }
 
 export function Landing() {
-  const { session, emailAllowed, publicState, ballot, phase, signIn, loadError } = useApp()
+  const { publicState, ballot, phase, loadError } = useApp()
   const now = useNow(1000)
   const navigate = useNavigate()
   const comoRef = useRef<HTMLElement | null>(null)
@@ -47,24 +46,16 @@ export function Landing() {
   const countdown = closesAt ? countdownTo(closesAt, now) : null
   const closed = phase === 'closed'
 
-  async function handlePrimary() {
-    if (session && emailAllowed) {
-      navigate(ballot ? '/votar' : '/entrar')
-      return
-    }
-    await signIn()
-    // No Supabase isto redireciona para o Google e a linha abaixo não roda.
-    // No modo demonstração a sessão é criada na hora, então seguimos o fluxo.
-    const user = await data.getSession()
-    if (user) navigate('/entrar')
+  function handlePrimary() {
+    if (closed && !ballot) return
+    navigate(ballot ? '/votar' : '/entrar')
   }
 
-  const primaryLabel = session && emailAllowed
-    ? ballot
+  const primaryLabel = closed && !ballot
+    ? 'Votação encerrada'
+    : ballot
       ? 'Editar meus votos'
-      : 'Continuar para a votação'
-    : 'Entrar com Google'
-  const primaryButtonLabel = closed && !ballot ? 'Votação encerrada' : primaryLabel
+      : 'Começar a votar'
 
   return (
     <main className="landing">
@@ -98,7 +89,7 @@ export function Landing() {
                   onClick={handlePrimary}
                   disabled={closed && !ballot}
                 >
-                  {primaryButtonLabel}
+                  {primaryLabel}
                 </button>
                 <a className="btn btn--secondary" href="#como-funciona">
                   Como funciona
@@ -106,7 +97,7 @@ export function Landing() {
               </div>
 
               <p className="hero-note">
-                Acesso restrito ao e-mail institucional <strong>@ifba.edu.br</strong>
+                Uma cédula por aparelho
                 {closesAt
                   ? closed
                     ? ` · encerrada em ${formatShortDeadline(closesAt)}`
@@ -119,23 +110,6 @@ export function Landing() {
                   </>
                 ) : null}
               </p>
-
-              {isInAppBrowser() ? (
-                <div className="hero-alert">
-                  <p className="hero-alert__title">Abra fora do WhatsApp</p>
-                  <p>
-                    O login do Google não funciona no navegador interno do WhatsApp.{' '}
-                    {isAndroid()
-                      ? 'Toque para abrir no Chrome:'
-                      : 'Toque em ⋯ e escolha “Abrir no Safari”.'}
-                  </p>
-                  {isAndroid() ? (
-                    <a className="btn btn--primary" href={chromeIntentUrl()}>
-                      Abrir no Chrome
-                    </a>
-                  ) : null}
-                </div>
-              ) : null}
 
               {loadError ? (
                 <p className="hero-note" style={{ color: 'var(--color-crimson)' }}>
@@ -154,7 +128,7 @@ export function Landing() {
                 </div>
                 <div>
                   <dt>Cédula</dt>
-                  <dd>1 por conta</dd>
+                  <dd>1 por aparelho</dd>
                 </div>
               </dl>
             </div>
@@ -179,26 +153,26 @@ export function Landing() {
           <div className="section-head">
             <h2 className="display">Como funciona</h2>
             <p>
-              Uma cédula por conta IFBA: dê as notas, a organização soma tudo e volta com os 6
-              times equilibrados. O resultado é só da organização — nunca é público.
+              Uma cédula por aparelho: você escreve seu nome, dá as notas, a organização soma tudo
+              e volta com os 6 times equilibrados. O resultado é só da organização — nunca é
+              público.
             </p>
             <p>
               Este é o aplicativo interno e sem fins comerciais da organização da 3ª Copa
-              Clandestina de Futsal, um campeonato entre estudantes do IFBA. O login com o Google
-              serve apenas para confirmar o e-mail institucional{' '}
-              <strong>@ifba.edu.br</strong> e garantir uma cédula por pessoa — não usamos a conta
-              para nenhuma outra finalidade, não exibimos anúncios e não geramos conteúdo com
-              inteligência artificial.
+              Clandestina de Futsal, um campeonato entre estudantes do IFBA. A identificação é só o
+              seu nome completo, guardado neste aparelho — sem conta, sem e-mail, sem senha. Não
+              usamos seus dados para nenhuma outra finalidade, não exibimos anúncios e não geramos
+              conteúdo com inteligência artificial.
             </p>
           </div>
 
           <ol className="steps grid">
             <li className="span-4">
               <p className="step-num">1</p>
-              <h3>Entre com o IFBA</h3>
+              <h3>Diga quem vota</h3>
               <p>
-                Login com o Google institucional. Só e-mails <strong>@ifba.edu.br</strong> podem
-                votar, e cada conta tem uma cédula.
+                Escreva seu nome completo na entrada. Ele fica salvo só neste aparelho e serve
+                para a organização conferir a votação.
               </p>
             </li>
             <li className="span-4">
@@ -229,7 +203,7 @@ export function Landing() {
               <dd className="t-stat">6</dd>
             </div>
             <div>
-              <dt>cédula por conta, editável</dt>
+              <dt>cédula por aparelho, editável</dt>
               <dd className="t-stat">1</dd>
             </div>
           </dl>
@@ -241,7 +215,7 @@ export function Landing() {
               onClick={handlePrimary}
               disabled={closed && !ballot}
             >
-              {primaryButtonLabel}
+              {primaryLabel}
             </button>
             <Link className="btn btn--secondary" to="/regulamento">
               Regulamento

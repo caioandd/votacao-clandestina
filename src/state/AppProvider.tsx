@@ -8,14 +8,24 @@ import {
   type ReactNode,
 } from 'react'
 import { data } from '../lib/data'
-import { isAllowedEmail } from '../lib/data/supabase'
+import {
+  clearVoter,
+  newVoterId,
+  readVoter,
+  saveVoter,
+  type VoterCookie,
+} from '../lib/cookie'
 import { phaseOf } from '../lib/deadline'
 import type { Ballot, Phase, Player, PublicState, SessionUser, SubmitResult } from '../lib/types'
 
 type AppContextValue = {
   booting: boolean
+  /** Sessão Google — usada só pela organização (painel) e por cédulas antigas. */
   session: SessionUser | null
-  emailAllowed: boolean
+  /** Identidade de quem vota: cookie do aparelho (ou conta antiga, nas legadas). */
+  voterId: string | null
+  /** Nome exibido do votante: cédula, cookie ou conta. */
+  voterName: string | null
   publicState: PublicState | null
   phase: Phase
   players: Player[]
@@ -24,6 +34,10 @@ type AppContextValue = {
   loadError: string | null
   signIn: () => Promise<void>
   signOut: () => Promise<void>
+  /** Guarda o nome completo no cookie e assume a identidade deste aparelho. */
+  identify: (fullName: string) => Promise<string>
+  /** Troca de pessoa: esquece o aparelho (apaga o cookie). */
+  forgetVoter: () => Promise<void>
   submit: (
     fullName: string,
     scores: Record<string, number | null>,
@@ -36,41 +50,44 @@ const AppContext = createContext<AppContextValue | null>(null)
 export function AppProvider({ children }: { children: ReactNode }) {
   const [booting, setBooting] = useState(true)
   const [session, setSession] = useState<SessionUser | null>(null)
+  const [voter, setVoter] = useState<VoterCookie | null>(() => readVoter())
   const [publicState, setPublicState] = useState<PublicState | null>(null)
   const [players, setPlayers] = useState<Player[]>([])
   const [ballot, setBallot] = useState<Ballot | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
 
-  const emailAllowed = session ? isAllowedEmail(session.email) : false
+  const voterId = voter?.id ?? session?.id ?? null
+  const voterName = ballot?.fullName ?? voter?.name ?? session?.displayName ?? null
 
-  const loadForUser = useCallback(async (user: SessionUser | null) => {
-    if (!user) {
-      setPlayers([])
-      setBallot(null)
-      setIsAdmin(false)
-      return
-    }
-    if (!isAllowedEmail(user.email)) {
-      setPlayers([])
-      setBallot(null)
-      setIsAdmin(false)
-      return
-    }
-    try {
-      const [list, myBallot, admin] = await Promise.all([
-        data.listPlayers(),
-        data.getMyBallot(),
-        data.isAdmin(),
-      ])
-      setPlayers(list)
-      setBallot(myBallot)
-      setIsAdmin(admin)
-      setLoadError(null)
-    } catch (error) {
-      setLoadError(error instanceof Error ? error.message : 'Falha ao carregar os dados.')
-    }
-  }, [])
+  const loadAll = useCallback(
+    async (sess: SessionUser | null, voterNow: VoterCookie | null) => {
+      const id = voterNow?.id ?? sess?.id ?? null
+      let failure: string | null = null
+      try {
+        setPlayers(await data.listPlayers())
+      } catch (error) {
+        failure = error instanceof Error ? error.message : 'Falha ao carregar os dados.'
+      }
+      if (!id) {
+        setBallot(null)
+        setIsAdmin(false)
+      } else {
+        try {
+          const [myBallot, admin] = await Promise.all([
+            data.getMyBallot(id),
+            sess ? data.isAdmin() : Promise.resolve(false),
+          ])
+          setBallot(myBallot)
+          setIsAdmin(admin)
+        } catch (error) {
+          failure ??= error instanceof Error ? error.message : 'Falha ao carregar os dados.'
+        }
+      }
+      setLoadError(failure)
+    },
+    [],
+  )
 
   const refresh = useCallback(async () => {
     try {
@@ -79,10 +96,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } catch {
       // mantém o último estado conhecido
     }
-    const user = await data.getSession()
-    setSession(user)
-    await loadForUser(user)
-  }, [loadForUser])
+    const sess = await data.getSession()
+    setSession(sess)
+    const voterNow = readVoter()
+    setVoter(voterNow)
+    await loadAll(sess, voterNow)
+  }, [loadAll])
 
   useEffect(() => {
     let alive = true
@@ -94,23 +113,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         if (alive) setLoadError(error instanceof Error ? error.message : 'Falha ao carregar.')
       }
-      const user = await data.getSession()
+      const sess = await data.getSession()
       if (!alive) return
-      setSession(user)
-      await loadForUser(user)
+      setSession(sess)
+      const voterNow = readVoter()
+      if (!alive) return
+      setVoter(voterNow)
+      await loadAll(sess, voterNow)
       if (alive) setBooting(false)
     })()
 
     const unsubscribe = data.onAuthChange((user) => {
       setSession(user)
-      void loadForUser(user)
+      void loadAll(user, readVoter())
     })
 
     return () => {
       alive = false
       unsubscribe()
     }
-  }, [loadForUser])
+  }, [loadAll])
 
   // Voltar para a aba revalida tudo: se a organização mexeu nos jogadores (ex.:
   // desativou alguém) enquanto a página estava aberta, quem vota já vê a lista
@@ -127,30 +149,58 @@ export function AppProvider({ children }: { children: ReactNode }) {
     await data.signIn()
     const user = await data.getSession()
     setSession(user)
-    await loadForUser(user)
-  }, [loadForUser])
+    await loadAll(user, readVoter())
+  }, [loadAll])
 
   const signOut = useCallback(async () => {
     await data.signOut()
     setSession(null)
-    await loadForUser(null)
-  }, [loadForUser])
+    await loadAll(null, readVoter())
+  }, [loadAll])
+
+  const identify = useCallback(
+    async (fullName: string) => {
+      const id = voter?.id ?? session?.id ?? newVoterId()
+      const next: VoterCookie = { id, name: fullName }
+      saveVoter(next)
+      setVoter(next)
+      try {
+        setBallot(await data.getMyBallot(id))
+      } catch (error) {
+        setLoadError(error instanceof Error ? error.message : 'Falha ao carregar os dados.')
+      }
+      return id
+    },
+    [voter, session],
+  )
+
+  const forgetVoter = useCallback(async () => {
+    clearVoter()
+    setVoter(null)
+    await refresh()
+  }, [refresh])
 
   const submit = useCallback(
     async (fullName: string, scores: Record<string, number | null>) => {
-      const result = await data.submitBallot(fullName, scores)
-      const fresh = await data.getMyBallot()
-      setBallot(fresh)
+      const id = voter?.id ?? session?.id ?? null
+      if (!id) throw new Error('Escreva seu nome completo antes de votar.')
+      const result = await data.submitBallot(id, fullName, scores)
+      try {
+        setBallot(await data.getMyBallot(id))
+      } catch {
+        // a cédula foi salva; a próxima carga da página busca de novo
+      }
       return result
     },
-    [],
+    [voter, session],
   )
 
   const value = useMemo<AppContextValue>(
     () => ({
       booting,
       session,
-      emailAllowed,
+      voterId,
+      voterName,
       publicState,
       phase: publicState ? phaseOf(publicState) : 'open',
       players,
@@ -159,13 +209,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       loadError,
       signIn,
       signOut,
+      identify,
+      forgetVoter,
       submit,
       refresh,
     }),
     [
       booting,
       session,
-      emailAllowed,
+      voterId,
+      voterName,
       publicState,
       players,
       ballot,
@@ -173,6 +226,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       loadError,
       signIn,
       signOut,
+      identify,
+      forgetVoter,
       submit,
       refresh,
     ],

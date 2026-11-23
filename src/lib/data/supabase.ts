@@ -27,8 +27,9 @@ const MESSAGES: Record<string, string> = {
   not_authenticated: 'Entre com o Google para continuar.',
   not_admin: 'Esta conta não tem permissão da organização.',
   player_not_found: 'Jogador não encontrado na lista.',
+  not_identified: 'Escreva seu nome completo antes de votar.',
   'Could not find the function':
-    'O banco do site ainda não tem esta ação. Rode as migrations 002 e 003 no Supabase (painel → SQL Editor) e tente de novo.',
+    'O banco do site ainda não tem esta ação. Rode as migrations 002, 003 e 004 no Supabase (painel → SQL Editor) e tente de novo.',
 }
 
 function friendly(message?: string, fallback = 'Não foi possível concluir. Tente de novo.') {
@@ -119,13 +120,10 @@ export function createSupabaseAdapter(url: string, anonKey: string): DataAdapter
     },
 
     async listPlayers(): Promise<Player[]> {
-      const { data, error } = await supabase
-        .from('players')
-        .select('id, full_name, nickname, is_goalkeeper, sort_order')
-        .eq('active', true)
-        .order('full_name', { ascending: true })
+      const { data, error } = await supabase.rpc('get_players')
       if (error) throw new Error(friendly(error.message))
-      return (data ?? []).map((row) => ({
+      const rows = (data ?? []) as Record<string, unknown>[]
+      return rows.map((row) => ({
         id: String(row.id),
         fullName: String(row.full_name),
         nickname: row.nickname ? String(row.nickname) : null,
@@ -148,8 +146,8 @@ export function createSupabaseAdapter(url: string, anonKey: string): DataAdapter
       }))
     },
 
-    async getMyBallot(): Promise<Ballot | null> {
-      const { data, error } = await supabase.rpc('get_my_ballot')
+    async getMyBallot(voterId: string): Promise<Ballot | null> {
+      const { data, error } = await supabase.rpc('voter_get_ballot', { p_voter_id: voterId })
       if (error) throw new Error(friendly(error.message))
       if (!data) return null
       const row = data as Record<string, unknown>
@@ -162,8 +160,9 @@ export function createSupabaseAdapter(url: string, anonKey: string): DataAdapter
       }
     },
 
-    async submitBallot(fullName, scores) {
-      const { data, error } = await supabase.rpc('submit_ballot', {
+    async submitBallot(voterId, fullName, scores) {
+      const { data, error } = await supabase.rpc('voter_submit_ballot', {
+        p_voter_id: voterId,
         p_full_name: fullName,
         p_scores: scores,
       })
@@ -202,6 +201,7 @@ export function createSupabaseAdapter(url: string, anonKey: string): DataAdapter
       const rows = (data ?? []) as Record<string, unknown>[]
       return rows.map((row) => ({
         id: String(row.id),
+        voterId: String(row.voter_id ?? ''),
         fullName: String(row.full_name),
         email: String(row.email ?? ''),
         revision: Number(row.revision ?? 1),

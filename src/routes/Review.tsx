@@ -9,7 +9,7 @@ import { isAnswered, missingCount } from '../lib/validation'
 import { formatShortDeadline } from '../lib/deadline'
 
 export function Review() {
-  const { session, players, ballot, publicState, submit, refresh } = useApp()
+  const { voterId, voterName, players, ballot, publicState, loadError, submit, refresh } = useApp()
   const navigate = useNavigate()
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -21,40 +21,40 @@ export function Review() {
   }, [refresh])
 
   const initial = useMemo(() => {
-    if (!session) {
+    if (!voterId) {
       return { scores: {} as Record<string, number | null>, fullName: '' }
     }
-    const draft = loadDraft(session.id)
+    const draft = loadDraft(voterId)
     const serverTime = ballot ? new Date(ballot.updatedAt).getTime() : 0
     const useDraft = Boolean(draft && draft.updatedAt > serverTime)
     return {
       scores: useDraft && draft ? draft.scores : (ballot?.scores ?? {}),
-      fullName: (useDraft && draft?.fullName) || ballot?.fullName || session.displayName || '',
+      fullName: (useDraft && draft?.fullName) || ballot?.fullName || voterName || '',
     }
-  }, [session, ballot])
+  }, [voterId, ballot, voterName])
 
   const [scores, setScores] = useState<Record<string, number | null>>(initial.scores)
   const fullName = initial.fullName
 
   const missing = missingCount(players, scores)
 
-  if (!session) return null
+  if (!voterId) return null
 
   const unknownCount = players.filter((player) => scores[player.id] === null).length
 
   function fillMissingWithUnknown() {
-    if (!session) return
+    if (!voterId) return
     const next = { ...scores }
     for (const player of players) {
       if (!isAnswered(next[player.id])) next[player.id] = null
     }
     setScores(next)
-    saveDraft(session.id, { fullName, scores: next, updatedAt: Date.now() })
+    saveDraft(voterId, { fullName, scores: next, updatedAt: Date.now() })
     window.scrollTo({ top: 0 })
   }
 
   async function handleSubmit() {
-    if (!session) return
+    if (!voterId) return
     if (missing > 0) {
       setError(`Ainda faltam ${missing} jogadores. Marque as estrelas ou use “Não sei”.`)
       return
@@ -63,7 +63,7 @@ export function Review() {
     setError(null)
     try {
       await submit(fullName, scores)
-      clearDraft(session.id)
+      clearDraft(voterId)
       navigate('/enviado')
     } catch (submitError) {
       setError(
@@ -95,6 +95,12 @@ export function Review() {
               </p>
             ) : null}
           </header>
+
+          {loadError ? (
+            <div className="rounded-[var(--radius-card)] border border-crimson/50 bg-crimson/10 px-4 py-3 text-[13px] leading-relaxed text-crimson">
+              {loadError}
+            </div>
+          ) : null}
 
           {missing > 0 ? (
             <div className="rounded-[var(--radius-card)] border border-gold/40 bg-gold/8 p-4">

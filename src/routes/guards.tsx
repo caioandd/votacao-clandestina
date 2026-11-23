@@ -13,10 +13,9 @@ export function Splash({ label = 'Carregando' }: { label?: string }) {
   )
 }
 
-export function RequireAuth({ children }: { children: ReactNode }) {
-  const { booting, session, emailAllowed } = useApp()
+export function RequireVoter({ children }: { children: ReactNode }) {
+  const { booting, voterId } = useApp()
   if (booting) return <Splash />
-  if (!session) return <Navigate to="/" replace />
-  if (!emailAllowed) return <Navigate to="/restrito" replace />
+  if (!voterId) return <Navigate to="/entrar" replace />
   return <>{children}</>
 }

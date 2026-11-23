@@ -5,10 +5,9 @@ import { useApp } from '../state/AppProvider'
 import { formatDateTime, formatShortDeadline } from '../lib/deadline'
 
 export function Success() {
-  const { session, ballot, publicState } = useApp()
+  const { ballot, publicState } = useApp()
   const navigate = useNavigate()
 
-  if (!session) return <Navigate to="/" replace />
   if (!ballot) return <Navigate to="/votar" replace />
 
   const shareText = encodeURIComponent(

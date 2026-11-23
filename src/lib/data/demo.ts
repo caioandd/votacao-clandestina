@@ -171,9 +171,9 @@ export function createDemoAdapter(): DataAdapter {
         }))
     },
 
-    async getMyBallot(): Promise<Ballot | null> {
+    async getMyBallot(voterId: string): Promise<Ballot | null> {
       const store = getStore()
-      const ballot = store.ballots.find((b) => b.voterId === DEMO_USER.id)
+      const ballot = store.ballots.find((b) => b.voterId === voterId)
       if (!ballot) return null
       return {
         fullName: ballot.fullName,
@@ -183,10 +183,10 @@ export function createDemoAdapter(): DataAdapter {
       }
     },
 
-    async submitBallot(fullName, scores) {
+    async submitBallot(voterId, fullName, scores) {
       const store = getStore()
       const now = new Date().toISOString()
-      const existing = store.ballots.find((b) => b.voterId === DEMO_USER.id)
+      const existing = store.ballots.find((b) => b.voterId === voterId)
       if (existing) {
         existing.fullName = fullName
         existing.revision += 1
@@ -195,7 +195,7 @@ export function createDemoAdapter(): DataAdapter {
       } else {
         store.ballots.push({
           id: `b-${Date.now()}`,
-          voterId: DEMO_USER.id,
+          voterId,
           fullName,
           revision: 1,
           submittedAt: now,
@@ -204,7 +204,7 @@ export function createDemoAdapter(): DataAdapter {
         })
       }
       save(store)
-      const updated = store.ballots.find((b) => b.voterId === DEMO_USER.id)!
+      const updated = store.ballots.find((b) => b.voterId === voterId)!
       return { revision: updated.revision, updatedAt: updated.updatedAt }
     },
 
@@ -268,8 +268,9 @@ export function createDemoAdapter(): DataAdapter {
       return store.ballots
         .map((b) => ({
           id: b.id,
+          voterId: b.voterId,
           fullName: b.fullName,
-          email: DEMO_USER.email,
+          email: '',
           revision: b.revision,
           submittedAt: b.submittedAt,
           updatedAt: b.updatedAt,

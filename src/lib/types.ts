@@ -46,7 +46,10 @@ export type RankingRow = {
 
 export type AdminBallot = {
   id: string
+  /** Identificador do aparelho (cookie) ou conta antiga; vazio em bases antigas. */
+  voterId: string
   fullName: string
+  /** Só as cédulas antigas (com login) têm e-mail; o resto vem vazio. */
   email: string
   revision: number
   submittedAt: string
@@ -76,7 +79,7 @@ export type TeamDraft = {
 
 export type DataAdapter = {
   mode: 'demo' | 'supabase'
-  /** Abre o fluxo de login (Google no Supabase; sessão simulada no demo). */
+  /** Login da organização (Google no Supabase; sessão simulada no demo). */
   signIn: () => Promise<void>
   signOut: () => Promise<void>
   getSession: () => Promise<SessionUser | null>
@@ -85,8 +88,10 @@ export type DataAdapter = {
   listPlayers: () => Promise<Player[]>
   /** Painel: todos os jogadores, inclusive os desativados. */
   listAllPlayers: () => Promise<AdminPlayerRow[]>
-  getMyBallot: () => Promise<Ballot | null>
+  /** Cédula do aparelho (voterId do cookie) — ou da conta antiga, nas legadas. */
+  getMyBallot: (voterId: string) => Promise<Ballot | null>
   submitBallot: (
+    voterId: string,
     fullName: string,
     scores: Record<string, number | null>,
   ) => Promise<SubmitResult>

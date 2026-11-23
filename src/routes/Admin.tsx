@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AppShell, PageContainer, DemoBadge } from '../components/Layout'
 import { Button, Kicker, Spinner } from '../components/ui'
+import { Splash } from './guards'
 import { useApp } from '../state/AppProvider'
+import { chromeIntentUrl, isAndroid, isInAppBrowser } from '../lib/browser'
 import { data } from '../lib/data'
 import type { AdminBallot, AdminPlayerRow, RankingRow } from '../lib/types'
 import { copyText, downloadFile } from '../lib/csv'
@@ -54,7 +56,8 @@ function Distribution({ distribution }: { distribution: Record<string, number> }
 }
 
 export function Admin() {
-  const { session, players, publicState, isAdmin, refresh, signOut } = useApp()
+  const { booting, session, voterId, players, publicState, isAdmin, refresh, signIn, signOut } =
+    useApp()
   const [tab, setTab] = useState<Tab>('ranking')
   const [ranking, setRanking] = useState<RankingRow[]>([])
   const [ballots, setBallots] = useState<AdminBallot[]>([])
@@ -93,7 +96,7 @@ export function Admin() {
     if (isAdmin) void load()
   }, [isAdmin, load])
 
-  if (!session) return null
+  if (booting) return <Splash />
 
   if (!isAdmin) {
     return (
@@ -104,9 +107,49 @@ export function Admin() {
             <p className="max-w-sm text-[15px] text-ash">
               Esta área é da organização da 3ª Copa Clandestina.
             </p>
-            <Button variant="ghost" onClick={() => { void signOut() }}>
-              Trocar de conta
-            </Button>
+            {session ? (
+              <>
+                <p className="text-[13px] text-ash-600">
+                  Conta atual: <span className="text-ash">{session.email}</span>
+                </p>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    void signOut()
+                  }}
+                >
+                  Trocar de conta
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  onClick={() => {
+                    void signIn()
+                  }}
+                >
+                  Entrar com Google
+                </Button>
+                {isInAppBrowser() ? (
+                  <div className="max-w-sm text-[13px] leading-relaxed text-ash-600">
+                    <p>
+                      O login do Google não abre no navegador do WhatsApp.{' '}
+                      {isAndroid()
+                        ? 'Use o botão abaixo para continuar no Chrome.'
+                        : 'Toque em ⋯ e escolha “Abrir no Safari”.'}
+                    </p>
+                    {isAndroid() ? (
+                      <a
+                        href={chromeIntentUrl()}
+                        className="mt-2 inline-block text-paper underline decoration-line-2 underline-offset-4"
+                      >
+                        Abrir no Chrome
+                      </a>
+                    ) : null}
+                  </div>
+                ) : null}
+              </>
+            )}
           </div>
         </PageContainer>
       </AppShell>
@@ -258,7 +301,7 @@ export function Admin() {
                   onChange={async () => {
                     await refresh()
                     await load()
-                    if (session) clearDraft(session.id)
+                    if (voterId) clearDraft(voterId)
                   }}
                   onMessage={setMessage}
                 />
@@ -594,12 +637,12 @@ function BallotsTab({
           downloadFile(
             'cedulas-3a-copa.csv',
             [
-              'id,nome,email,versao,enviado_em,atualizado_em',
+              'id,nome,contato,versao,enviado_em,atualizado_em',
               ...ballots.map((ballot) =>
                 [
                   ballot.id,
                   `"${ballot.fullName}"`,
-                  ballot.email,
+                  ballot.email || `aparelho ${ballot.voterId.slice(0, 8)}`,
                   ballot.revision,
                   ballot.submittedAt,
                   ballot.updatedAt,
@@ -622,7 +665,8 @@ function BallotsTab({
             <div className="min-w-0">
               <h3 className="truncate text-[14px] font-semibold text-paper">{ballot.fullName}</h3>
               <p className="truncate text-[12px] text-ash-600">
-                {ballot.email} · versão {ballot.revision} · {formatDateTime(ballot.updatedAt)}
+                {ballot.email || `aparelho ${ballot.voterId.slice(0, 8)}`} · versão{' '}
+                {ballot.revision} · {formatDateTime(ballot.updatedAt)}
               </p>
             </div>
             <Button variant="danger" size="sm" onClick={() => onDelete(ballot.id)}>

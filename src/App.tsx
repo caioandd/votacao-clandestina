@@ -9,7 +9,7 @@ import { Closed } from './routes/Closed'
 import { Restricted } from './routes/Restricted'
 import { Admin } from './routes/Admin'
 import { Privacidade, Regulamento } from './routes/Static'
-import { RequireAuth } from './routes/guards'
+import { RequireVoter } from './routes/guards'
 
 export default function App() {
   return (
@@ -20,12 +20,12 @@ export default function App() {
           <Route path="/restrito" element={<Restricted />} />
           <Route path="/regulamento" element={<Regulamento />} />
           <Route path="/privacidade" element={<Privacidade />} />
-          <Route path="/entrar" element={<RequireAuth><Identify /></RequireAuth>} />
-          <Route path="/votar" element={<RequireAuth><Vote /></RequireAuth>} />
-          <Route path="/revisar" element={<RequireAuth><Review /></RequireAuth>} />
-          <Route path="/enviado" element={<RequireAuth><Success /></RequireAuth>} />
-          <Route path="/encerrada" element={<RequireAuth><Closed /></RequireAuth>} />
-          <Route path="/admin" element={<RequireAuth><Admin /></RequireAuth>} />
+          <Route path="/entrar" element={<Identify />} />
+          <Route path="/votar" element={<RequireVoter><Vote /></RequireVoter>} />
+          <Route path="/revisar" element={<RequireVoter><Review /></RequireVoter>} />
+          <Route path="/enviado" element={<RequireVoter><Success /></RequireVoter>} />
+          <Route path="/encerrada" element={<Closed />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

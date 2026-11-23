@@ -24,9 +24,10 @@ export function Regulamento() {
 
           <Block title="Quem vota">
             <p>
-              Qualquer pessoa com e-mail institucional <strong className="text-paper">@ifba.edu.br</strong>{' '}
-              e conta Google ativa. Cada conta registra <strong className="text-paper">uma única
-              cédula</strong>.
+              Qualquer pessoa que recebeu o link da votação. Na entrada você escreve seu{' '}
+              <strong className="text-paper">nome completo</strong> — ele fica salvo apenas no seu
+              aparelho, sem conta e sem senha. Cada aparelho registra{' '}
+              <strong className="text-paper">uma única cédula</strong>.
             </p>
           </Block>
 
@@ -107,19 +108,16 @@ export function Privacidade() {
             </p>
           </Block>
 
-          <Block title="2. Dados que o login do Google fornece">
+          <Block title="2. Como você se identifica para votar">
             <p>
-              O aplicativo pede acesso apenas à{' '}
-              <strong className="text-paper">identidade básica</strong> da conta Google: nome,
-              endereço de e-mail e foto de perfil. O e-mail é usado para uma única verificação: se a
-              conta termina em <strong className="text-paper">@ifba.edu.br</strong> (público
-              autorizado a votar) e se ela já possui uma cédula — é assim que garantimos{' '}
-              <strong className="text-paper">uma cédula por pessoa</strong>. O nome e a foto servem
-              apenas para indicar quem está conectado na tela do aplicativo.
+              Para votar não pedimos conta, e-mail nem senha: na entrada você escreve seu{' '}
+              <strong className="text-paper">nome completo</strong>. O nome fica salvo em um
+              cookie apenas no seu aparelho — serve para pré-preencher a entrada nas próximas
+              visitas e para permitir que você edite a própria cédula. A organização usa o nome
+              para conferir que cada pessoa votou uma vez.
             </p>
             <p>
-              Não acessamos Gmail, Drive, contatos, agenda ou qualquer outro dado da sua conta
-              Google. O aplicativo não usa inteligência artificial para gerar, editar ou publicar
+              O aplicativo não usa inteligência artificial para gerar, editar ou publicar
               conteúdo.
             </p>
           </Block>
@@ -127,8 +125,10 @@ export function Privacidade() {
           <Block title="3. Dados guardados na votação">
             <p>Quando você envia a cédula, guardamos:</p>
             <ul className="flex flex-col gap-1 pl-5">
-              <li className="list-disc">o endereço de e-mail da conta usada no login;</li>
-              <li className="list-disc">o nome completo informado por você no envio;</li>
+              <li className="list-disc">o nome completo informado por você;</li>
+              <li className="list-disc">
+                um identificador aleatório do aparelho (para permitir a edição da própria cédula);
+              </li>
               <li className="list-disc">as notas (1 a 5 estrelas ou “não sei”) dadas a cada jogador;</li>
               <li className="list-disc">a data e a hora de cada envio;</li>
               <li className="list-disc">o número da versão da cédula (cada edição gera uma versão).</li>
@@ -138,7 +138,7 @@ export function Privacidade() {
           <Block title="4. Para que usamos">
             <ul className="flex flex-col gap-1 pl-5">
               <li className="list-disc">
-                garantir uma cédula por conta e permitir que você edite o voto até o prazo;
+                garantir uma cédula por aparelho e permitir que você edite o voto até o prazo;
               </li>
               <li className="list-disc">
                 apurar o ranking interno e dividir os participantes em 6 times equilibrados;
@@ -180,18 +180,20 @@ export function Privacidade() {
               , incluindo os requisitos de Uso Limitado.
             </p>
             <p>
-              O único recurso do Google utilizado é o login (OpenID Connect), com os escopos de
-              e-mail e perfil, exclusivamente para autenticação.
+              O login com o Google (OpenID Connect, escopos de e-mail e perfil) é usado somente
+              pela organização, para acessar o painel interno com o ranking. Quem vota não faz
+              login e não precisa de conta Google. Não acessamos Gmail, Drive, contatos, agenda ou
+              qualquer outro dado de contas Google.
             </p>
           </Block>
 
           <Block title="7. Onde os dados ficam">
             <p>
               O site é hospedado no <strong className="text-paper">GitHub Pages</strong>; o banco de
-              dados e a autenticação ficam no <strong className="text-paper">Supabase</strong>; o
-              login é processado pelo <strong className="text-paper">Google</strong>. Esses
-              provedores tratam os dados apenas para operar o serviço, conforme as políticas
-              próprias de cada um.
+              dados fica no <strong className="text-paper">Supabase</strong>; o login da organização
+              é processado pelo <strong className="text-paper">Google</strong>. Esses provedores
+              tratam os dados apenas para operar o serviço, conforme as políticas próprias de cada
+              um.
             </p>
           </Block>
 

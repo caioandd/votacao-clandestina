@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { Crest } from '../components/Layout'
 import { Button } from '../components/ui'
 import { useApp } from '../state/AppProvider'
@@ -13,9 +14,11 @@ export function Restricted() {
           Acesso restrito
         </h1>
         <p className="mx-auto max-w-sm text-[15px] leading-relaxed text-ash">
-          Esta votação é exclusiva para o e-mail institucional{' '}
-          <strong className="font-semibold text-paper">@ifba.edu.br</strong>. Entre com a sua conta
-          institucional do Google.
+          O login com o Google é usado apenas pela organização, para abrir o painel da votação.
+          Esta conta não tem essa permissão.
+        </p>
+        <p className="mx-auto max-w-sm text-[14px] leading-relaxed text-ash-600">
+          Para votar não é preciso login: volte ao início e escreva seu nome completo.
         </p>
         {session ? (
           <p className="text-[13px] text-ash-600">
@@ -23,13 +26,21 @@ export function Restricted() {
           </p>
         ) : null}
       </div>
-      <Button
-        onClick={() => {
-          void signOut()
-        }}
-      >
-        Trocar de conta
-      </Button>
+      <div className="flex flex-col items-center gap-3">
+        <Button
+          onClick={() => {
+            void signOut()
+          }}
+        >
+          Trocar de conta
+        </Button>
+        <Link
+          to="/"
+          className="text-[13px] text-ash-600 underline decoration-line-2 underline-offset-4 transition-colors hover:text-paper"
+        >
+          Ir para a votação
+        </Link>
+      </div>
     </div>
   )
 }

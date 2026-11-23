@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppShell, PageContainer } from '../components/Layout'
 import { ScoreDisplay } from '../components/ScoreDisplay'
@@ -9,10 +9,16 @@ import { isAnswered, missingCount } from '../lib/validation'
 import { formatShortDeadline } from '../lib/deadline'
 
 export function Review() {
-  const { session, players, ballot, publicState, submit } = useApp()
+  const { session, players, ballot, publicState, submit, refresh } = useApp()
   const navigate = useNavigate()
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Revalida ao entrar: se a lista mudou (jogador desativado/novo) enquanto a
+  // página estava aberta, a revisão já mostra o estado atual.
+  useEffect(() => {
+    void refresh()
+  }, [refresh])
 
   const initial = useMemo(() => {
     if (!session) {

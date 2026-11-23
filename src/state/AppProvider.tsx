@@ -112,6 +112,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [loadForUser])
 
+  // Voltar para a aba revalida tudo: se a organização mexeu nos jogadores (ex.:
+  // desativou alguém) enquanto a página estava aberta, quem vota já vê a lista
+  // certa ao retomar.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void refresh()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [refresh])
+
   const signIn = useCallback(async () => {
     await data.signIn()
     const user = await data.getSession()

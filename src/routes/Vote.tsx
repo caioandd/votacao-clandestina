@@ -12,12 +12,18 @@ import { answeredCount, missingCount } from '../lib/validation'
 import { formatShortDeadline } from '../lib/deadline'
 
 export function Vote() {
-  const { session, players, ballot, publicState, phase, signOut } = useApp()
+  const { session, players, ballot, publicState, phase, signOut, refresh } = useApp()
   const now = useNow(1000)
   const navigate = useNavigate()
   const [scores, setScores] = useState<Record<string, number | null>>({})
   const [ready, setReady] = useState(false)
   const [draftName, setDraftName] = useState('')
+
+  // Ao entrar na tela, revalida jogadores e cédula: um jogador desativado pela
+  // organização some daqui mesmo que a página já estivesse aberta antes.
+  useEffect(() => {
+    void refresh()
+  }, [refresh])
 
   useEffect(() => {
     if (ready || !session || !publicState) return

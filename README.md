@@ -8,9 +8,10 @@ A organização usa as notas para montar **6 times equilibrados**. O ranking é
 interno: nenhum votante vê a nota do outro. O logar com Google é só da
 organização, para abrir o painel (`/admin`).
 
-Depois dos times definidos, a página **`/copa`** mostra a tabela do campeonato
-ao vivo: dois grupos de três times, semifinais cruzadas, final e disputa de 3º
-lugar — com os placares preenchidos pela organização (logada).
+Depois dos times definidos, a página **`/copa`** mostra o campeonato ao vivo: os
+seis times **com seus integrantes**, dois grupos de três, semifinais cruzadas,
+final e disputa de 3º lugar — com os placares preenchidos pela organização
+(logada).
 
 | | |
 |---|---|
@@ -20,7 +21,7 @@ lugar — com os placares preenchidos pela organização (logada).
 | Prazo padrão | 25/11/2026 às 23:59 (America/Bahia) |
 | Votação | 1 cédula por aparelho, editável até o prazo |
 | Resultado | Só no painel da organização (`/admin`) |
-| Campeonato | Tabela pública em `/copa` (placares só a organização edita) |
+| Campeonato | Times e tabela pública em `/copa` (só a organização edita) |
 
 ---
 
@@ -39,7 +40,7 @@ existir `.env.local`.
 
 Para testar o painel com dados: `/admin` → aba **Cédulas** → *Gerar 24 cédulas de
 teste* → aba **Times** → *Gerar 6 times*. A página `/copa` roda no mesmo modo,
-com a chave inteira editável.
+com a chave inteira editável (placares, nomes e integrantes).
 
 ---
 
@@ -62,8 +63,10 @@ com a chave inteira editável.
      [`20261125000100_campeonato.sql`](supabase/migrations/20261125000100_campeonato.sql)
      (chave do campeonato da página `/copa`) e o
      [`20261125000200_times_do_campeonato.sql`](supabase/migrations/20261125000200_times_do_campeonato.sql)
-     (os seis times da 3ª Copa e a tabela oficial dos jogos). Todos são
-     idempotentes.
+     (os seis times da 3ª Copa e a tabela oficial dos jogos) e o
+     [`20261125000300_integrantes_dos_times.sql`](supabase/migrations/20261125000300_integrantes_dos_times.sql)
+     (integrantes dos times na seção *Times e integrantes* da `/copa`). Todos
+     são idempotentes.
 3. Em **Project Settings → API**, copie:
    - **Project URL** → `VITE_SUPABASE_URL`
    - a chave pública → `VITE_SUPABASE_ANON_KEY` (no projeto novo ela aparece como
@@ -203,8 +206,9 @@ Qualquer pessoa abre e acompanha sem login; a página se atualiza sozinha a cada
 
 Com a **conta da organização logada**, a mesma página libera a edição:
 
-1. **Nomes dos times** — abra a área *Editar nomes dos times* e renomeie os seis
-   slots (`Time A1`…`Time B3`) com os times reais. O grupo de cada slot é fixo.
+1. **Times e integrantes** — na seção *Times e integrantes*, no fim da página,
+   edite o nome de cada time e a lista de quem joga nele — **um integrante por
+   linha** — e toque em **Salvar**. O grupo de cada slot é fixo.
 2. **Placares** — toque nos campos de gols da partida, preencha e **Salvar**. A
    tabela do grupo e o chaveamento recalculam na hora, para todos.
 3. **Mata-mata empatado** — se o jogo terminar empatado, aparecem os campos de
@@ -220,7 +224,8 @@ O chaveamento é cruzado: **1º do A × 2º do B** e **2º do A × 1º do B** na
 semifinais; vencedores fazem a final, perdedores disputam o 3º lugar.
 
 > Os slots da `/copa` são separados dos 6 times de treino gerados na aba
-> **Times** do painel: a organização copia os nomes para a `/copa` quando quiser.
+> **Times** do painel: a organização copia os nomes (e a lista de integrantes)
+> para a seção *Times e integrantes* da `/copa` quando quiser.
 
 ---
 
@@ -233,8 +238,8 @@ ballots   (id, voter_id único, full_name, revision, submitted_at, updated_at)
 ratings   (ballot_id, player_id, score 1..5 ou null)   -- null = "não sei"
 settings  (opens_at, closes_at, results_public)
 admins    (user_id)
-tournament_teams    (id a1..b3, name, group_key A/B, sort_order)
-                    -- os slots da página /copa (o nome é editável pela org)
+tournament_teams    (id a1..b3, name, group_key A/B, sort_order, members text[])
+                    -- os slots da página /copa (nome e integrantes editáveis pela org)
 tournament_matches  (id, stage group/semi/final/third, home/away_team_id,
                      home/away_score, home/away_pens, sort_order)
                     -- placar + pênaltis; nulos = jogo sem resultado
@@ -250,8 +255,9 @@ Regras garantidas pelo banco:
 - Trigger de defesa bloqueia escrita fora do prazo mesmo em chamadas diretas.
 - Ranking exposto apenas para quem está em `admins`.
 - A chave do campeonato é lida por `get_tournament` (pública, serve o anon) e
-  escrita só por `admin_set_team_name` e `admin_set_match_score`, que exigem
-  `is_admin()`. As tabelas têm RLS e não aceitam escrita direta.
+  escrita só por `admin_set_team_name`, `admin_set_team_members` e
+  `admin_set_match_score`, que exigem `is_admin()`. As tabelas têm RLS e não
+  aceitam escrita direta.
 - A tabela de grupo e o chaveamento **não ficam salvos**: são calculados no
   cliente a partir dos placares, então nunca ficam defasados.
 
@@ -288,9 +294,11 @@ uso. Com a votação correndo isso não acontece; depois da copa, exporte os dad
 fechar. Jogador que desistir: desmarque em **Ativos na votação** (os votos dele
 ficam guardados). Depois do prazo, a lista deve ficar congelada.
 
-**A tabela da `/copa` não carrega ou o placar não salva** — falta rodar a
-migration 005 no Supabase
-([`20261125000100_campeonato.sql`](supabase/migrations/20261125000100_campeonato.sql)).
+**A tabela da `/copa` não carrega, o placar não salva ou os integrantes não
+editam** — faltam rodar as migrations do campeonato no Supabase
+([`20261125000100_campeonato.sql`](supabase/migrations/20261125000100_campeonato.sql),
+[`20261125000200_times_do_campeonato.sql`](supabase/migrations/20261125000200_times_do_campeonato.sql)
+e [`20261125000300_integrantes_dos_times.sql`](supabase/migrations/20261125000300_integrantes_dos_times.sql)).
 A própria página avisa quando o banco não tem a função.
 
 ---

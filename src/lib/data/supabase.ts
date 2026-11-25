@@ -25,6 +25,8 @@ const MESSAGES: Record<string, string> = {
   invalid_score: 'Uma das notas ficou fora do intervalo de 1 a 5.',
   invalid_name: 'Confira o nome informado.',
   invalid_team_name: 'Use um nome de time de 1 a 40 caracteres.',
+  invalid_members:
+    'Confira os integrantes: um nome por linha, de 1 a 40 caracteres (no máximo 15 por time).',
   invalid_match_score: 'Placar inválido: use números de 0 a 99 (e pênaltis só no mata-mata empatado).',
   team_not_found: 'Time não encontrado na chave do campeonato.',
   match_not_found: 'Partida não encontrada na chave do campeonato.',
@@ -34,7 +36,7 @@ const MESSAGES: Record<string, string> = {
   player_not_found: 'Jogador não encontrado na lista.',
   not_identified: 'Escreva seu nome completo antes de votar.',
   'Could not find the function':
-    'O banco do site ainda não tem esta ação. Rode as migrations 002, 003, 004 e 005 no Supabase (painel → SQL Editor) e tente de novo.',
+    'O banco do site ainda não tem esta ação. Rode as migrations 002 a 007 no Supabase (painel → SQL Editor) e tente de novo.',
 }
 
 function friendly(message?: string, fallback = 'Não foi possível concluir. Tente de novo.') {
@@ -268,6 +270,7 @@ export function createSupabaseAdapter(url: string, anonKey: string): DataAdapter
         name: String(row.name ?? ''),
         groupKey: (String(row.group_key) === 'B' ? 'B' : 'A') as 'A' | 'B',
         sortOrder: Number(row.sort_order ?? 0),
+        members: Array.isArray(row.members) ? row.members.map((member) => String(member)) : [],
       }))
       const matches = ((raw.matches ?? []) as Record<string, unknown>[]).map((row) => ({
         id: String(row.id),
@@ -300,6 +303,14 @@ export function createSupabaseAdapter(url: string, anonKey: string): DataAdapter
       const { error } = await supabase.rpc('admin_set_team_name', {
         p_team_id: teamId,
         p_name: name,
+      })
+      if (error) throw new Error(friendly(error.message))
+    },
+
+    async setTeamMembers(teamId, members) {
+      const { error } = await supabase.rpc('admin_set_team_members', {
+        p_team_id: teamId,
+        p_members: members,
       })
       if (error) throw new Error(friendly(error.message))
     },

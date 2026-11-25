@@ -33,7 +33,8 @@ const clockFormat = new Intl.DateTimeFormat('pt-BR', {
 
 export function Copa() {
   const { isAdmin } = useApp()
-  const { tournament, error, lastSync, refresh, saveScore, saveTeamName } = useTournament()
+  const { tournament, error, lastSync, refresh, saveScore, saveTeamName, saveTeamMembers } =
+    useTournament()
   const view = useMemo(() => (tournament ? buildView(tournament) : null), [tournament])
   const teamsById = useMemo(() => {
     const map = new Map<string, TournamentTeam>()
@@ -67,7 +68,7 @@ export function Copa() {
               {lastSync ? <span>Atualizado às {clockFormat.format(lastSync)}</span> : null}
               {isAdmin ? (
                 <span className="text-gold">
-                  Organização: toque no placar para editar e use Salvar.
+                  Organização: placares editáveis aqui; nomes e integrantes no fim da página.
                 </span>
               ) : null}
             </div>
@@ -156,8 +157,13 @@ export function Copa() {
                 </div>
               </section>
 
-              {isAdmin && tournament ? (
-                <NamesSection teams={tournament.teams} onSave={saveTeamName} />
+              {tournament ? (
+                <TeamsSection
+                  teams={tournament.teams}
+                  isAdmin={isAdmin}
+                  onSaveName={saveTeamName}
+                  onSaveMembers={saveTeamMembers}
+                />
               ) : null}
             </>
           )}
@@ -666,66 +672,119 @@ function ScoreLine({
   )
 }
 
-function NamesSection({
+/** Lê a lista de integrantes digitada (um por linha) e valida. */
+function parseMembers(text: string): { list: string[]; error: string | null } {
+  const list = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+  if (list.length > 15) return { list, error: 'No máximo 15 integrantes por time.' }
+  if (list.some((member) => member.length > 40)) {
+    return { list, error: 'Cada nome pode ter até 40 caracteres.' }
+  }
+  return { list, error: null }
+}
+
+function MemberList({ members }: { members: string[] }) {
+  if (!members.length) {
+    return <p className="text-[13px] text-ash-600">Integrantes a definir.</p>
+  }
+  return (
+    <ul className="flex min-w-0 flex-col gap-0.5">
+      {members.map((member, index) => (
+        <li key={`${index}-${member}`} className="truncate text-[13px] leading-relaxed text-ash">
+          {member}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+/**
+ * Times e integrantes: lista pública da chave. A organização edita o nome e a
+ * lista de cada time na própria página (um integrante por linha, Salvar por time).
+ */
+function TeamsSection({
   teams,
-  onSave,
+  isAdmin,
+  onSaveName,
+  onSaveMembers,
 }: {
   teams: TournamentTeam[]
-  onSave: (teamId: string, name: string) => Promise<void>
+  isAdmin: boolean
+  onSaveName: (teamId: string, name: string) => Promise<void>
+  onSaveMembers: (teamId: string, members: string[]) => Promise<void>
 }) {
-  const [open, setOpen] = useState(false)
   return (
-    <section className="min-w-0 rounded-[var(--radius-card)] border border-line bg-surface">
-      <button
-        type="button"
-        onClick={() => setOpen((value) => !value)}
-        className="flex w-full min-w-0 items-center justify-between gap-3 p-4 text-left"
-      >
-        <span className="flex min-w-0 flex-col">
-          <span className="text-[15px] font-semibold text-paper">Editar nomes dos times</span>
-          <span className="text-[12px] text-ash-600">
-            Os seis slots da chave, editáveis só pela organização.
-          </span>
-        </span>
-        <span className="shrink-0 text-[12px] font-semibold text-gold">
-          {open ? 'Fechar' : 'Abrir'}
-        </span>
-      </button>
-      {open ? (
-        <div className="grid min-w-0 gap-4 border-t border-line p-4 sm:grid-cols-2">
-          {(['A', 'B'] as const).map((groupKey) => (
-            <div key={groupKey} className="flex min-w-0 flex-col gap-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ash-600">
-                Grupo {groupKey}
-              </p>
-              {teams
-                .filter((team) => team.groupKey === groupKey)
-                .map((team) => (
-                  <TeamNameRow key={team.id} team={team} onSave={onSave} />
-                ))}
-            </div>
-          ))}
-        </div>
-      ) : null}
+    <section aria-label="Times e integrantes" className="flex min-w-0 flex-col gap-4">
+      <div className="flex min-w-0 flex-col gap-1">
+        <h2 className="display text-[24px] text-paper">Times e integrantes</h2>
+        <p className="text-[13px] leading-relaxed text-ash">
+          Quem joga em cada time da chave.
+          {isAdmin
+            ? ' Toque no nome e na lista para editar — um integrante por linha — e use Salvar.'
+            : ''}
+        </p>
+      </div>
+      <div className="grid min-w-0 items-start gap-4 lg:grid-cols-2">
+        {(['A', 'B'] as const).map((groupKey) => (
+          <div key={groupKey} className="flex min-w-0 flex-col gap-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ash-600">
+              Grupo {groupKey}
+            </p>
+            {teams
+              .filter((team) => team.groupKey === groupKey)
+              .map((team) =>
+                isAdmin ? (
+                  <EditableTeamCard
+                    key={team.id}
+                    team={team}
+                    onSaveName={onSaveName}
+                    onSaveMembers={onSaveMembers}
+                  />
+                ) : (
+                  <article
+                    key={team.id}
+                    className="flex min-w-0 flex-col gap-2 rounded-[var(--radius-card)] border border-line bg-surface p-4"
+                  >
+                    <h3 className="truncate text-[15px] font-semibold text-paper">{team.name}</h3>
+                    <MemberList members={team.members} />
+                  </article>
+                ),
+              )}
+          </div>
+        ))}
+      </div>
     </section>
   )
 }
 
-function TeamNameRow({
+/** Cartão do time para a organização: nome + integrantes, Salvar por time. */
+function EditableTeamCard({
   team,
-  onSave,
+  onSaveName,
+  onSaveMembers,
 }: {
   team: TournamentTeam
-  onSave: (teamId: string, name: string) => Promise<void>
+  onSaveName: (teamId: string, name: string) => Promise<void>
+  onSaveMembers: (teamId: string, members: string[]) => Promise<void>
 }) {
-  const [value, setValue] = useState(team.name)
+  const serverMembers = team.members.join('\n')
+  const [name, setName] = useState(team.name)
+  const [membersText, setMembersText] = useState(serverMembers)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
 
+  // o valor do servidor manda: polls de 15s não atropelam quem está digitando
+  // porque a comparação é pelo texto, não pela identidade do array
   useEffect(() => {
-    setValue(team.name)
+    setName(team.name)
   }, [team.name])
+
+  useEffect(() => {
+    setMembersText(serverMembers)
+  }, [serverMembers])
 
   useEffect(() => {
     if (!saved) return
@@ -733,19 +792,28 @@ function TeamNameRow({
     return () => clearTimeout(timer)
   }, [saved])
 
-  const trimmed = value.trim()
-  const dirty = trimmed !== team.name
-  const invalid = trimmed.length === 0 || trimmed.length > 40
+  const trimmedName = name.trim()
+  const parsed = parseMembers(membersText)
+  const nameOk = trimmedName.length >= 1 && trimmedName.length <= 40
+  const dirtyName = trimmedName !== team.name
+  const dirtyMembers = parsed.list.join('\n') !== serverMembers
+  const dirty = dirtyName || dirtyMembers
 
   async function handleSave() {
-    if (invalid) {
-      setError('Use um nome de 1 a 40 caracteres.')
+    if (!nameOk) {
+      setError('Use um nome de time de 1 a 40 caracteres.')
       return
     }
+    if (parsed.error) {
+      setError(parsed.error)
+      return
+    }
+    if (!dirty) return
     setSaving(true)
     setError(null)
     try {
-      await onSave(team.id, trimmed)
+      if (dirtyName) await onSaveName(team.id, trimmedName)
+      if (dirtyMembers) await onSaveMembers(team.id, parsed.list)
       setSaved(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Não foi possível salvar. Tente de novo.')
@@ -755,25 +823,44 @@ function TeamNameRow({
   }
 
   return (
-    <div className="flex min-w-0 flex-col gap-1">
-      <div className="flex min-w-0 items-center gap-2">
-        <input
-          value={value}
-          maxLength={40}
-          disabled={saving}
-          onChange={(event) => {
-            setValue(event.target.value)
-            setSaved(false)
-          }}
-          aria-label={`Nome do time no slot ${team.id.toUpperCase()}`}
-          className="h-10 min-w-0 flex-1 rounded-[8px] border border-line-2 bg-ink px-3 text-[14px] text-paper outline-none transition-colors focus:border-gold disabled:opacity-50"
-        />
+    <article className="flex min-w-0 flex-col gap-2 rounded-[var(--radius-card)] border border-line bg-surface p-4">
+      <input
+        value={name}
+        maxLength={40}
+        disabled={saving}
+        onChange={(event) => {
+          setName(event.target.value)
+          setSaved(false)
+        }}
+        aria-label={`Nome do time no slot ${team.id.toUpperCase()}`}
+        className="h-10 w-full min-w-0 rounded-[8px] border border-line-2 bg-ink px-3 text-[14px] font-semibold text-paper outline-none transition-colors focus:border-gold disabled:opacity-50"
+      />
+      <textarea
+        value={membersText}
+        rows={Math.max(4, Math.min(8, team.members.length))}
+        disabled={saving}
+        onChange={(event) => {
+          setMembersText(event.target.value)
+          setSaved(false)
+        }}
+        aria-label={`Integrantes do ${team.name}`}
+        placeholder="Um integrante por linha"
+        className="min-h-[96px] w-full min-w-0 resize-y rounded-[8px] border border-line-2 bg-ink px-3 py-2 text-[13px] leading-relaxed text-paper outline-none transition-colors focus:border-gold disabled:opacity-50"
+      />
+      <div className="flex min-w-0 items-center justify-end gap-3">
+        {error ? (
+          <span className="min-w-0 flex-1 text-right text-[11px] leading-snug text-crimson">
+            {error}
+          </span>
+        ) : saved && !dirty ? (
+          <span className="text-[11px] text-success">Salvo</span>
+        ) : (
+          <span className="text-right text-[11px] text-ash-600">Um integrante por linha</span>
+        )}
         <Button size="sm" variant="ghost" disabled={!dirty || saving} onClick={() => void handleSave()}>
-          {saving ? '…' : 'Salvar'}
+          {saving ? 'Salvando…' : 'Salvar'}
         </Button>
       </div>
-      {error ? <p className="text-[11px] text-crimson">{error}</p> : null}
-      {saved && !dirty ? <p className="text-[11px] text-success">Nome atualizado.</p> : null}
-    </div>
+    </article>
   )
 }

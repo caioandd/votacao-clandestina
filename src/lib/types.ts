@@ -83,6 +83,8 @@ export type TournamentTeam = {
   name: string
   groupKey: 'A' | 'B'
   sortOrder: number
+  /** Quem joga no time, na ordem da lista oficial (editável pela organização). */
+  members: string[]
 }
 
 export type TournamentStage = 'group' | 'semi' | 'final' | 'third'
@@ -143,6 +145,7 @@ export type DataAdapter = {
     awayPens: number | null,
   ) => Promise<void>
   setTeamName: (teamId: string, name: string) => Promise<void>
+  setTeamMembers: (teamId: string, members: string[]) => Promise<void>
   deleteBallot: (ballotId: string) => Promise<void>
   /** Apaga todas as cédulas e notas. Retorna quantas cédulas foram removidas. */
   clearBallots: () => Promise<number>

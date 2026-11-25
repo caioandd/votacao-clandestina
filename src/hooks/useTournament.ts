@@ -72,5 +72,13 @@ export function useTournament() {
     [refresh],
   )
 
-  return { tournament, loading, error, lastSync, refresh, saveScore, saveTeamName }
+  const saveTeamMembers = useCallback(
+    async (teamId: string, members: string[]) => {
+      await data.setTeamMembers(teamId, members)
+      await refresh()
+    },
+    [refresh],
+  )
+
+  return { tournament, loading, error, lastSync, refresh, saveScore, saveTeamName, saveTeamMembers }
 }

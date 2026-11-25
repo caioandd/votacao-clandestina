@@ -67,6 +67,7 @@ function defaultTournament(): Tournament {
     name,
     groupKey,
     sortOrder,
+    members: [] as string[],
   })
   const match = (
     id: string,
@@ -132,6 +133,11 @@ function load(): DemoStore {
     if (!parsed.tournament?.teams?.length || !parsed.tournament?.matches?.length) {
       parsed.tournament = defaultTournament()
     }
+    // chave antiga sem integrantes: cada time ganha a lista vazia
+    parsed.tournament.teams = parsed.tournament.teams.map((team) => ({
+      ...team,
+      members: Array.isArray(team.members) ? team.members : [],
+    }))
     return parsed
   } catch {
     return defaults()
@@ -384,7 +390,7 @@ export function createDemoAdapter(): DataAdapter {
     async getTournament(): Promise<Tournament> {
       const store = getStore()
       return {
-        teams: store.tournament.teams.map((team) => ({ ...team })),
+        teams: store.tournament.teams.map((team) => ({ ...team, members: [...team.members] })),
         matches: store.tournament.matches.map((match) => ({ ...match })),
       }
     },
@@ -405,6 +411,20 @@ export function createDemoAdapter(): DataAdapter {
       const team = store.tournament.teams.find((team) => team.id === teamId)
       if (!team) throw new Error('Time não encontrado na chave do campeonato.')
       team.name = name
+      save(store)
+    },
+
+    async setTeamMembers(teamId, members) {
+      const store = getStore()
+      const team = store.tournament.teams.find((team) => team.id === teamId)
+      if (!team) throw new Error('Time não encontrado na chave do campeonato.')
+      const clean = members.map((member) => member.trim()).filter(Boolean)
+      if (clean.length > 15 || clean.some((member) => member.length > 40)) {
+        throw new Error(
+          'Confira os integrantes: um nome por linha, de 1 a 40 caracteres (no máximo 15 por time).',
+        )
+      }
+      team.members = clean
       save(store)
     },
 

@@ -15,7 +15,7 @@
   Rotas: landing, landing-encerrada, identificar, identificar-salvo,
           identificar-encerrada, votar, revisar, enviado, encerrada, regulamento,
           privacidade, admin, admin-porta, ranking, times, cedulas, ajustes,
-          copa, copa-publica, copa-cheia, copa-nomes.
+          copa, copa-publica, copa-cheia, copa-publica-cheia, copa-times-salvo.
   Opções: --w <largura> --h <altura> --out <arquivo.png> --base <url>
           --act "<js>" (roda antes da foto) --settle <ms> --profile <dir>
 */
@@ -87,9 +87,9 @@ const SEED_COPA = BOOT.replace('__RESULT__ = { ok: true }', `
   __RESULT__ = { ok: true }`)
 
 // Copa cheia: grupos completos, semis decididas, final nos pênaltis e 3º lugar
-// também nos pênaltis — exercita tabelas, chaveamento, pódio e a linha de pênaltis.
-const SEED_COPA_CHEIA = BOOT.replace('__RESULT__ = { ok: true }', `
-  await adapter.signIn()
+// também nos pênaltis — exercita tabelas, chaveamento, pódio, a linha de
+// pênaltis e a seção "Times e integrantes".
+const COPA_CHEIA_STEPS = `
   const set = (id, home, away, hp = null, ap = null) => adapter.setMatchScore(id, home, away, hp, ap)
   await set('ga1', 3, 2)
   await set('ga2', 1, 1)
@@ -106,7 +106,42 @@ const SEED_COPA_CHEIA = BOOT.replace('__RESULT__ = { ok: true }', `
     b1: 'Time do Povo', b2: 'Vila Nova', b3: 'Atlético Clandestino',
   }
   for (const [id, name] of Object.entries(names)) await adapter.setTeamName(id, name)
+  const members = {
+    a1: ['Beto', 'Fumaça', 'Juba', 'Nando', 'Tico'],
+    a2: ['Biel', 'Dudu', 'Gui', 'Magrão', 'Vini'],
+    a3: ['Chico', 'Duda', 'Éder', 'Rafa', 'Zé'],
+    b1: ['Cauã', 'Leco', 'Nino', 'Serginho', 'Wand'],
+    b2: ['Alemão', 'Buiú', 'Ganso', 'Pedrinho', 'Téo'],
+    b3: ['Bibi', 'Cadu', 'Índio', 'Jota', 'Marcelinho'],
+  }
+  for (const [id, list] of Object.entries(members)) await adapter.setTeamMembers(id, list)
+`
+const SEED_COPA_CHEIA = BOOT.replace('__RESULT__ = { ok: true }', `
+  await adapter.signIn()
+  ${COPA_CHEIA_STEPS}
   __RESULT__ = { ok: true }`)
+
+// Mesma chave cheia, mas sem login: é a visão pública da página.
+const SEED_COPA_PUBLICA_CHEIA = BOOT.replace('__RESULT__ = { ok: true }', `
+  ${COPA_CHEIA_STEPS}
+  __RESULT__ = { ok: true }`)
+
+// Edição de ponta a ponta: a organização adiciona um integrante e salva.
+const TYPE_MEMBERS = `
+  const setNativeValue = (el, value) => {
+    const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype
+    Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, value)
+    el.dispatchEvent(new Event('input', { bubbles: true }))
+  }
+  const ta = [...document.querySelectorAll('textarea')].find((el) => (el.getAttribute('aria-label') || '').includes('Os Clandestinos'))
+  if (ta) {
+    setNativeValue(ta, ta.value + '\\nNovato QA')
+    await new Promise((r) => setTimeout(r, 300))
+    const btn = [...ta.closest('article').querySelectorAll('button')].find((b) => b.textContent.trim() === 'Salvar')
+    if (btn) btn.click()
+    await new Promise((r) => setTimeout(r, 700))
+  }
+`
 
 const click = (t) => `{ const btn = [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === ${JSON.stringify(t)}); if (btn) btn.click() }`
 const clickHas = (t) => `{ const btn = [...document.querySelectorAll('button')].find((x) => x.textContent.includes(${JSON.stringify(t)})); if (btn) btn.click() }`
@@ -137,11 +172,8 @@ const PRESETS = {
   copa: { path: '/copa', seed: SEED_COPA },
   'copa-publica': { path: '/copa', seed: BOOT },
   'copa-cheia': { path: '/copa', seed: SEED_COPA_CHEIA },
-  'copa-nomes': {
-    path: '/copa',
-    seed: SEED_COPA_CHEIA,
-    act: clickHas('Editar nomes') + pause(300),
-  },
+  'copa-publica-cheia': { path: '/copa', seed: SEED_COPA_PUBLICA_CHEIA },
+  'copa-times-salvo': { path: '/copa', seed: SEED_COPA_CHEIA, act: TYPE_MEMBERS },
 }
 const preset = PRESETS[route]
 if (!preset) {

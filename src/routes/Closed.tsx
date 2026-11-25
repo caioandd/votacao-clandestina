@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { AppShell, PageContainer } from '../components/Layout'
 import { ScoreDisplay } from '../components/ScoreDisplay'
 import { Button, Kicker } from '../components/ui'
@@ -9,6 +9,7 @@ import { formatDateTime } from '../lib/deadline'
 
 export function Closed() {
   const { booting, players, ballot, voterId } = useApp()
+  const navigate = useNavigate()
 
   if (booting) return <Splash />
 
@@ -22,11 +23,12 @@ export function Closed() {
           <header className="flex flex-col gap-3">
             <Kicker>Votação encerrada</Kicker>
             <h1 className="display text-[38px] leading-none text-paper sm:text-[46px]">
-              Resultados em breve
+              Agora é a copa
             </h1>
             <p className="max-w-lg text-[16px] leading-relaxed text-paper">
-              Os resultados serão divulgados em breve pela organização da 3ª Copa Clandestina, que
-              já está usando as notas para montar os 6 times equilibrados.
+              As notas já foram para a organização e os <strong>6 times</strong> estão montados.
+              Sábado, 28/11, a copa rola inteira no IFBA — acompanhe grupos, semifinais, final e 3º
+              lugar pela tabela do campeonato.
             </p>
             <p className="max-w-lg text-[15px] leading-relaxed text-ash">
               {ballot
@@ -54,10 +56,16 @@ export function Closed() {
           ) : null}
 
           <div className="flex flex-col gap-3 sm:flex-row">
+            <Link
+              to="/copa"
+              className="btn-press inline-flex h-11 items-center justify-center rounded-full bg-gold px-6 text-[15px] font-semibold text-ink hover:bg-gold-deep"
+            >
+              Acompanhar os resultados
+            </Link>
             <Link to="/regulamento" className="btn-press inline-flex h-11 items-center justify-center rounded-full border border-line-2 px-6 text-[15px] font-semibold text-paper hover:bg-surface">
               Ver regulamento
             </Link>
-            <Button variant="quiet" onClick={() => window.location.assign('#/')}>
+            <Button variant="quiet" onClick={() => navigate('/')}>
               Voltar ao início
             </Button>
           </div>

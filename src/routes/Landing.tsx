@@ -75,18 +75,25 @@ export function Landing() {
 
               <h1 className="display">3ª Copa Clandestina de Futsal</h1>
 
-              <p className="hero__lead">
-                Dê uma nota de <strong>1 a 5 estrelas</strong> para cada jogador. A organização usa
-                as notas para montar os <strong>6 times</strong> equilibrados da copa.
-              </p>
+              {closed ? (
+                <p className="hero__lead">
+                  Os <strong>6 times</strong> já estão montados e a copa rola no sábado, 28/11:
+                  grupos, semifinais, final e 3º lugar — tudo no mesmo dia.
+                </p>
+              ) : (
+                <p className="hero__lead">
+                  Dê uma nota de <strong>1 a 5 estrelas</strong> para cada jogador. A organização
+                  usa as notas para montar os <strong>6 times</strong> equilibrados da copa.
+                </p>
+              )}
 
               {closed ? (
                 <div className="hero-alert">
                   <p className="hero-alert__title">Votação encerrada</p>
                   <p>
-                    As notas já foram para a organização, que está montando os 6 times equilibrados.
-                    <strong className="text-paper"> Os resultados serão divulgados em breve</strong>{' '}
-                    pela organização da 3ª Copa Clandestina.
+                    As notas já foram para a organização e não podem mais ser alteradas. Os
+                    resultados da votação são internos — os jogos e placares ficam na tabela do
+                    campeonato.
                   </p>
                 </div>
               ) : countdown ? (
@@ -97,20 +104,33 @@ export function Landing() {
               ) : null}
 
               <div className="btn-row">
-                <button
-                  type="button"
-                  className="btn btn--primary"
-                  onClick={handlePrimary}
-                  disabled={closed && !ballot}
-                >
-                  {primaryLabel}
-                </button>
-                <a className="btn btn--secondary" href="#como-funciona">
-                  Como funciona
-                </a>
-                <Link className="btn btn--secondary" to="/copa">
-                  Tabela do campeonato
-                </Link>
+                {closed ? (
+                  <>
+                    <Link className="btn btn--primary" to="/copa">
+                      Acompanhar os resultados
+                    </Link>
+                    {ballot ? (
+                      <button type="button" className="btn btn--secondary" onClick={handlePrimary}>
+                        Ver meus votos
+                      </button>
+                    ) : null}
+                    <a className="btn btn--secondary" href="#como-funciona">
+                      Como funciona
+                    </a>
+                  </>
+                ) : (
+                  <>
+                    <button type="button" className="btn btn--primary" onClick={handlePrimary}>
+                      {primaryLabel}
+                    </button>
+                    <a className="btn btn--secondary" href="#como-funciona">
+                      Como funciona
+                    </a>
+                    <Link className="btn btn--secondary" to="/copa">
+                      Tabela do campeonato
+                    </Link>
+                  </>
+                )}
               </div>
 
               <p className="hero-note">
@@ -226,14 +246,15 @@ export function Landing() {
           </dl>
 
           <div className="btn-row">
-            <button
-              type="button"
-              className="btn btn--primary"
-              onClick={handlePrimary}
-              disabled={closed && !ballot}
-            >
-              {primaryLabel}
-            </button>
+            {closed ? (
+              <Link className="btn btn--primary" to="/copa">
+                Acompanhar os resultados
+              </Link>
+            ) : (
+              <button type="button" className="btn btn--primary" onClick={handlePrimary}>
+                {primaryLabel}
+              </button>
+            )}
             <Link className="btn btn--secondary" to="/regulamento">
               Regulamento
             </Link>

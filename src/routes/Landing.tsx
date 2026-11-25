@@ -108,6 +108,9 @@ export function Landing() {
                 <a className="btn btn--secondary" href="#como-funciona">
                   Como funciona
                 </a>
+                <Link className="btn btn--secondary" to="/copa">
+                  Tabela do campeonato
+                </Link>
               </div>
 
               <p className="hero-note">

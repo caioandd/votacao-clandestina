@@ -8,6 +8,7 @@ import { Success } from './routes/Success'
 import { Closed } from './routes/Closed'
 import { Restricted } from './routes/Restricted'
 import { Admin } from './routes/Admin'
+import { Copa } from './routes/Copa'
 import { Privacidade, Regulamento } from './routes/Static'
 import { RequireVoter } from './routes/guards'
 
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/revisar" element={<RequireVoter><Review /></RequireVoter>} />
           <Route path="/enviado" element={<RequireVoter><Success /></RequireVoter>} />
           <Route path="/encerrada" element={<Closed />} />
+          <Route path="/copa" element={<Copa />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

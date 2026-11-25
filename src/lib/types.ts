@@ -77,6 +77,36 @@ export type TeamDraft = {
   params: Record<string, unknown>
 }
 
+/** Time da chave do campeonato (página /copa). Slots fixos a1..a3 / b1..b3. */
+export type TournamentTeam = {
+  id: string
+  name: string
+  groupKey: 'A' | 'B'
+  sortOrder: number
+}
+
+export type TournamentStage = 'group' | 'semi' | 'final' | 'third'
+
+export type TournamentMatch = {
+  id: string
+  stage: TournamentStage
+  groupKey: 'A' | 'B' | null
+  /** Só as partidas de grupo têm times fixos; as eliminatórias saem da tabela. */
+  homeTeamId: string | null
+  awayTeamId: string | null
+  homeScore: number | null
+  awayScore: number | null
+  /** Pênaltis: só em mata-mata empatado no tempo normal. */
+  homePens: number | null
+  awayPens: number | null
+  sortOrder: number
+}
+
+export type Tournament = {
+  teams: TournamentTeam[]
+  matches: TournamentMatch[]
+}
+
 export type DataAdapter = {
   mode: 'demo' | 'supabase'
   /** Login da organização (Google no Supabase; sessão simulada no demo). */
@@ -103,6 +133,16 @@ export type DataAdapter = {
   setPlayerActive: (playerId: string, value: boolean) => Promise<void>
   addPlayer: (fullName: string, nickname: string | null, isGoalkeeper: boolean) => Promise<void>
   setDeadline: (isoDate: string) => Promise<void>
+  /** Chave do campeonato (/copa): leitura pública, escrita só da organização. */
+  getTournament: () => Promise<Tournament>
+  setMatchScore: (
+    matchId: string,
+    homeScore: number | null,
+    awayScore: number | null,
+    homePens: number | null,
+    awayPens: number | null,
+  ) => Promise<void>
+  setTeamName: (teamId: string, name: string) => Promise<void>
   deleteBallot: (ballotId: string) => Promise<void>
   /** Apaga todas as cédulas e notas. Retorna quantas cédulas foram removidas. */
   clearBallots: () => Promise<number>

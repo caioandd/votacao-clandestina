@@ -6,7 +6,11 @@ escreve o nome completo, que fica salvo num **cookie do aparelho**, e dá uma no
 
 A organização usa as notas para montar **6 times equilibrados**. O ranking é
 interno: nenhum votante vê a nota do outro. O logar com Google é só da
-organização, para abrir o painel (`#/admin`).
+organização, para abrir o painel (`/admin`).
+
+Depois dos times definidos, a página **`/copa`** mostra a tabela do campeonato
+ao vivo: dois grupos de três times, semifinais cruzadas, final e disputa de 3º
+lugar — com os placares preenchidos pela organização (logada).
 
 | | |
 |---|---|
@@ -15,7 +19,8 @@ organização, para abrir o painel (`#/admin`).
 | Login | Só a organização (Google). Votantes usam cookie do aparelho |
 | Prazo padrão | 25/11/2026 às 23:59 (America/Bahia) |
 | Votação | 1 cédula por aparelho, editável até o prazo |
-| Resultado | Só no painel da organização (`#/admin`) |
+| Resultado | Só no painel da organização (`/admin`) |
+| Campeonato | Tabela pública em `/copa` (placares só a organização edita) |
 
 ---
 
@@ -32,8 +37,9 @@ npm run dev
 Abra `http://localhost:5173`. O rodapé mostra **MODO DEMONSTRAÇÃO** enquanto não
 existir `.env.local`.
 
-Para testar o painel com dados: `#/admin` → aba **Cédulas** → *Gerar 24 cédulas de
-teste* → aba **Times** → *Gerar 6 times*.
+Para testar o painel com dados: `/admin` → aba **Cédulas** → *Gerar 24 cédulas de
+teste* → aba **Times** → *Gerar 6 times*. A página `/copa` roda no mesmo modo,
+com a chave inteira editável.
 
 ---
 
@@ -50,9 +56,11 @@ teste* → aba **Times** → *Gerar 6 times*.
      [`20261122000200_admin_limpar_votos_nota.sql`](supabase/migrations/20261122000200_admin_limpar_votos_nota.sql)
      (coluna *nota* do painel + limpar votos), o
      [`20261124000100_admin_desativar_jogador.sql`](supabase/migrations/20261124000100_admin_desativar_jogador.sql)
-     (desativar/reativar jogador) e o
+     (desativar/reativar jogador), o
      [`20261124000200_voto_por_cookie.sql`](supabase/migrations/20261124000200_voto_por_cookie.sql)
-     (voto por cookie, sem login para quem vota). Todos são idempotentes.
+     (voto por cookie, sem login para quem vota) e o
+     [`20261125000100_campeonato.sql`](supabase/migrations/20261125000100_campeonato.sql)
+     (chave do campeonato da página `/copa`). Todos são idempotentes.
 3. Em **Project Settings → API**, copie:
    - **Project URL** → `VITE_SUPABASE_URL`
    - a chave pública → `VITE_SUPABASE_ANON_KEY` (no projeto novo ela aparece como
@@ -75,7 +83,7 @@ cp .env.example .env.local
 ## 3. Ligar o login do Google (só para a organização)
 
 Quem vota não passa por aqui. O Google é usado apenas pelas contas da
-organização, para abrir o painel `#/admin`.
+organização, para abrir o painel `/admin` (e editar a chave em `/copa`).
 
 ### 3.1 No Google Cloud Console
 
@@ -130,6 +138,11 @@ git push -u origin main
 O `base` do build é calculado sozinho (`/<nome-do-repo>/`). Se um dia usar domínio
 próprio, ajuste `VITE_BASE` para `/` no workflow.
 
+> **Links diretos** (ex.: `.../votacao-clandestina/copa`): o build copia o
+> `index.html` para `404.html` (`scripts/copy-404.mjs`), e o GitHub Pages serve
+> essa cópia para qualquer caminho desconhecido — o app sobe e o router encontra
+> a rota. Funciona para `/copa`, `/admin` etc.
+
 ---
 
 ## 5. Promover a organização a admin
@@ -142,13 +155,13 @@ select id, email from auth.users where email = 'seuemail@ifba.edu.br'
 on conflict (user_id) do nothing;
 ```
 
-Pronto: essa conta passa a ver o painel em `#/admin`.
+Pronto: essa conta passa a ver o painel em `/admin` (e a editar a chave em `/copa`).
 
 ---
 
 ## 6. Como operar no dia
 
-Tudo em `#/admin`:
+Tudo em `/admin`:
 
 | Aba | Para que serve |
 |---|---|
@@ -179,6 +192,33 @@ reabrir, mude o prazo para uma data futura e salve.
 **Antes de divulgar os times**: baixe os CSVs (Ranking, Cédulas e Times) como
 backup.
 
+### Campeonato (`/copa`)
+
+A tabela do campeonato fica numa página pública própria: `.../votacao-clandestina/copa`.
+Qualquer pessoa abre e acompanha sem login; a página se atualiza sozinha a cada
+15 segundos (e ao voltar para a aba), sem precisar recarregar.
+
+Com a **conta da organização logada**, a mesma página libera a edição:
+
+1. **Nomes dos times** — abra a área *Editar nomes dos times* e renomeie os seis
+   slots (`Time A1`…`Time B3`) com os times reais. O grupo de cada slot é fixo.
+2. **Placares** — toque nos campos de gols da partida, preencha e **Salvar**. A
+   tabela do grupo e o chaveamento recalculam na hora, para todos.
+3. **Mata-mata empatado** — se o jogo terminar empatado, aparecem os campos de
+   **pênaltis**: preencha (um time precisa ter mais) para definir quem avança.
+   Sem isso o vencedor não é definido.
+4. **Limpar um resultado** — deixe os dois campos vazios e salve.
+
+Regras da tabela: vitória 3 pontos, empate 1. Os dois primeiros de cada grupo
+avançam; o desempate é pontos → saldo de gols → gols pró → confronto direto. Se
+ainda empatar em tudo, a página avisa e a organização decide no sorteio.
+
+O chaveamento é cruzado: **1º do A × 2º do B** e **2º do A × 1º do B** nas
+semifinais; vencedores fazem a final, perdedores disputam o 3º lugar.
+
+> Os slots da `/copa` são separados dos 6 times de treino gerados na aba
+> **Times** do painel: a organização copia os nomes para a `/copa` quando quiser.
+
 ---
 
 ## 7. Banco de dados (resumo)
@@ -190,6 +230,11 @@ ballots   (id, voter_id único, full_name, revision, submitted_at, updated_at)
 ratings   (ballot_id, player_id, score 1..5 ou null)   -- null = "não sei"
 settings  (opens_at, closes_at, results_public)
 admins    (user_id)
+tournament_teams    (id a1..b3, name, group_key A/B, sort_order)
+                    -- os slots da página /copa (o nome é editável pela org)
+tournament_matches  (id, stage group/semi/final/third, home/away_team_id,
+                     home/away_score, home/away_pens, sort_order)
+                    -- placar + pênaltis; nulos = jogo sem resultado
 ```
 
 Regras garantidas pelo banco:
@@ -201,6 +246,11 @@ Regras garantidas pelo banco:
   de votação, nome, lista completa e intervalo das notas.
 - Trigger de defesa bloqueia escrita fora do prazo mesmo em chamadas diretas.
 - Ranking exposto apenas para quem está em `admins`.
+- A chave do campeonato é lida por `get_tournament` (pública, serve o anon) e
+  escrita só por `admin_set_team_name` e `admin_set_match_score`, que exigem
+  `is_admin()`. As tabelas têm RLS e não aceitam escrita direta.
+- A tabela de grupo e o chaveamento **não ficam salvos**: são calculados no
+  cliente a partir dos placares, então nunca ficam defasados.
 
 ### Nota usada nos times
 
@@ -235,13 +285,18 @@ uso. Com a votação correndo isso não acontece; depois da copa, exporte os dad
 fechar. Jogador que desistir: desmarque em **Ativos na votação** (os votos dele
 ficam guardados). Depois do prazo, a lista deve ficar congelada.
 
+**A tabela da `/copa` não carrega ou o placar não salva** — falta rodar a
+migration 005 no Supabase
+([`20261125000100_campeonato.sql`](supabase/migrations/20261125000100_campeonato.sql)).
+A própria página avisa quando o banco não tem a função.
+
 ---
 
 ## 9. Desenvolvimento
 
 ```bash
 npm run dev       # servidor local
-npm run build     # build de produção (tsc + vite)
+npm run build     # build de produção (tsc + vite + cópia do 404.html)
 npm run preview   # serve o build
 npm run lint      # oxlint
 ```
@@ -249,8 +304,12 @@ npm run lint      # oxlint
 - `src/lib/data/` — camada de dados com dois adaptadores: `demo` (localStorage) e
   `supabase`. O modo é escolhido pelas variáveis de ambiente.
 - `src/lib/teams.ts` — gerador dos times (snake draft + busca local determinística).
+- `src/lib/tournament.ts` — tabelas de grupo (com desempates), chaveamento e pódio
+  da página `/copa`, tudo derivado dos placares.
 - `src/lib/validation.ts` — mesmas regras de nome e nota que o banco aplica.
 - `supabase/migrations/` — o SQL aplicado no projeto.
+- `scripts/copy-404.mjs` — copia o `index.html` do build para `404.html`
+  (fallback dos links diretos no GitHub Pages).
 - `scripts/shoot-app.mjs` — tira fotos das telas internas no modo demonstração
   (Chrome headless), para conferir o visual em 390px e 1440px:
 
@@ -258,9 +317,12 @@ npm run lint      # oxlint
 node scripts/shoot-app.mjs --route votar   --w 390
 node scripts/shoot-app.mjs --route times   --w 390
 node scripts/shoot-app.mjs --route ranking --w 1440
+node scripts/shoot-app.mjs --route copa-cheia --w 390
 node scripts/shoot-app.mjs --route times   --w 390 --clip header
 ```
 
   Rotas: `identificar, votar, revisar, enviado, encerrada, regulamento, privacidade,
-  admin, ranking, times, cedulas, ajustes`. `--clip <seletor>` recorta um elemento.
-  As imagens vão para `shots/app/` (fora do git).
+  admin, ranking, times, cedulas, ajustes` e as da chave: `copa` (vazia, logado),
+  `copa-publica` (visão pública), `copa-cheia` (grupos e mata-mata completos) e
+  `copa-nomes` (área de renomear times aberta). `--clip <seletor>` recorta um
+  elemento. As imagens vão para `shots/app/` (fora do git).

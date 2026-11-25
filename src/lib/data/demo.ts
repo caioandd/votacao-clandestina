@@ -9,6 +9,7 @@ import type {
   PublicState,
   RankingRow,
   SessionUser,
+  Tournament,
 } from '../types'
 
 /**
@@ -37,6 +38,8 @@ type DemoStore = {
   ballots: DemoBallot[]
   opensAt: string
   closesAt: string
+  /** Chave do campeonato (mesmos ids/estrutura do banco — migration 005). */
+  tournament: Tournament
 }
 
 const DEMO_USER: SessionUser = {
@@ -57,6 +60,57 @@ function defaultPlayers(): DemoPlayer[] {
   }))
 }
 
+/** Chave inicial do campeonato: 6 slots de time e 10 partidas, tudo zerado. */
+function defaultTournament(): Tournament {
+  const team = (id: string, name: string, groupKey: 'A' | 'B', sortOrder: number) => ({
+    id,
+    name,
+    groupKey,
+    sortOrder,
+  })
+  const match = (
+    id: string,
+    stage: Tournament['matches'][number]['stage'],
+    groupKey: 'A' | 'B' | null,
+    homeTeamId: string | null,
+    awayTeamId: string | null,
+    sortOrder: number,
+  ) => ({
+    id,
+    stage,
+    groupKey,
+    homeTeamId,
+    awayTeamId,
+    homeScore: null,
+    awayScore: null,
+    homePens: null,
+    awayPens: null,
+    sortOrder,
+  })
+  return {
+    teams: [
+      team('a1', 'Time A1', 'A', 1),
+      team('a2', 'Time A2', 'A', 2),
+      team('a3', 'Time A3', 'A', 3),
+      team('b1', 'Time B1', 'B', 1),
+      team('b2', 'Time B2', 'B', 2),
+      team('b3', 'Time B3', 'B', 3),
+    ],
+    matches: [
+      match('ga1', 'group', 'A', 'a1', 'a2', 1),
+      match('ga2', 'group', 'A', 'a1', 'a3', 2),
+      match('ga3', 'group', 'A', 'a2', 'a3', 3),
+      match('gb1', 'group', 'B', 'b1', 'b2', 4),
+      match('gb2', 'group', 'B', 'b1', 'b3', 5),
+      match('gb3', 'group', 'B', 'b2', 'b3', 6),
+      match('sf1', 'semi', null, null, null, 7),
+      match('sf2', 'semi', null, null, null, 8),
+      match('final', 'final', null, null, null, 9),
+      match('third', 'third', null, null, null, 10),
+    ],
+  }
+}
+
 function defaults(): DemoStore {
   const base = createPublicState()
   return {
@@ -64,6 +118,7 @@ function defaults(): DemoStore {
     ballots: [],
     opensAt: base.opensAt,
     closesAt: base.closesAt,
+    tournament: defaultTournament(),
   }
 }
 
@@ -73,6 +128,10 @@ function load(): DemoStore {
     if (!raw) return defaults()
     const parsed = JSON.parse(raw) as DemoStore
     if (!parsed.players?.length) return defaults()
+    // stores antigos (sem a chave do campeonato) ganham a chave padrão
+    if (!parsed.tournament?.teams?.length || !parsed.tournament?.matches?.length) {
+      parsed.tournament = defaultTournament()
+    }
     return parsed
   } catch {
     return defaults()
@@ -319,6 +378,33 @@ export function createDemoAdapter(): DataAdapter {
     async setDeadline(isoDate) {
       const store = getStore()
       store.closesAt = isoDate
+      save(store)
+    },
+
+    async getTournament(): Promise<Tournament> {
+      const store = getStore()
+      return {
+        teams: store.tournament.teams.map((team) => ({ ...team })),
+        matches: store.tournament.matches.map((match) => ({ ...match })),
+      }
+    },
+
+    async setMatchScore(matchId, homeScore, awayScore, homePens, awayPens) {
+      const store = getStore()
+      const match = store.tournament.matches.find((m) => m.id === matchId)
+      if (!match) throw new Error('Partida não encontrada na chave do campeonato.')
+      match.homeScore = homeScore
+      match.awayScore = awayScore
+      match.homePens = homePens
+      match.awayPens = awayPens
+      save(store)
+    },
+
+    async setTeamName(teamId, name) {
+      const store = getStore()
+      const team = store.tournament.teams.find((team) => team.id === teamId)
+      if (!team) throw new Error('Time não encontrado na chave do campeonato.')
+      team.name = name
       save(store)
     },
 

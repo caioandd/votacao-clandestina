@@ -8,6 +8,7 @@ import type {
   PublicState,
   RankingRow,
   SessionUser,
+  Tournament,
 } from '../types'
 
 export const ALLOWED_DOMAIN = 'ifba.edu.br'
@@ -23,13 +24,17 @@ const MESSAGES: Record<string, string> = {
   incomplete_ballot: 'Falta avaliar alguns jogadores.',
   invalid_score: 'Uma das notas ficou fora do intervalo de 1 a 5.',
   invalid_name: 'Confira o nome informado.',
+  invalid_team_name: 'Use um nome de time de 1 a 40 caracteres.',
+  invalid_match_score: 'Placar inválido: use números de 0 a 99 (e pênaltis só no mata-mata empatado).',
+  team_not_found: 'Time não encontrado na chave do campeonato.',
+  match_not_found: 'Partida não encontrada na chave do campeonato.',
   email_domain_not_allowed: 'Acesso restrito ao e-mail institucional @ifba.edu.br.',
   not_authenticated: 'Entre com o Google para continuar.',
   not_admin: 'Esta conta não tem permissão da organização.',
   player_not_found: 'Jogador não encontrado na lista.',
   not_identified: 'Escreva seu nome completo antes de votar.',
   'Could not find the function':
-    'O banco do site ainda não tem esta ação. Rode as migrations 002, 003 e 004 no Supabase (painel → SQL Editor) e tente de novo.',
+    'O banco do site ainda não tem esta ação. Rode as migrations 002, 003, 004 e 005 no Supabase (painel → SQL Editor) e tente de novo.',
 }
 
 function friendly(message?: string, fallback = 'Não foi possível concluir. Tente de novo.') {
@@ -252,6 +257,51 @@ export function createSupabaseAdapter(url: string, anonKey: string): DataAdapter
       const { data, error } = await supabase.rpc('admin_clear_ballots')
       if (error) throw new Error(friendly(error.message))
       return Number(data ?? 0)
+    },
+
+    async getTournament(): Promise<Tournament> {
+      const { data, error } = await supabase.rpc('get_tournament')
+      if (error) throw new Error(friendly(error.message))
+      const raw = (data ?? {}) as Record<string, unknown>
+      const teams = ((raw.teams ?? []) as Record<string, unknown>[]).map((row) => ({
+        id: String(row.id),
+        name: String(row.name ?? ''),
+        groupKey: (String(row.group_key) === 'B' ? 'B' : 'A') as 'A' | 'B',
+        sortOrder: Number(row.sort_order ?? 0),
+      }))
+      const matches = ((raw.matches ?? []) as Record<string, unknown>[]).map((row) => ({
+        id: String(row.id),
+        stage: String(row.stage) as Tournament['matches'][number]['stage'],
+        groupKey:
+          row.group_key === 'A' || row.group_key === 'B' ? (row.group_key as 'A' | 'B') : null,
+        homeTeamId: row.home_team_id ? String(row.home_team_id) : null,
+        awayTeamId: row.away_team_id ? String(row.away_team_id) : null,
+        homeScore: num(row.home_score),
+        awayScore: num(row.away_score),
+        homePens: num(row.home_pens),
+        awayPens: num(row.away_pens),
+        sortOrder: Number(row.sort_order ?? 0),
+      }))
+      return { teams, matches }
+    },
+
+    async setMatchScore(matchId, homeScore, awayScore, homePens, awayPens) {
+      const { error } = await supabase.rpc('admin_set_match_score', {
+        p_match_id: matchId,
+        p_home_score: homeScore,
+        p_away_score: awayScore,
+        p_home_pens: homePens,
+        p_away_pens: awayPens,
+      })
+      if (error) throw new Error(friendly(error.message))
+    },
+
+    async setTeamName(teamId, name) {
+      const { error } = await supabase.rpc('admin_set_team_name', {
+        p_team_id: teamId,
+        p_name: name,
+      })
+      if (error) throw new Error(friendly(error.message))
     },
   }
 }

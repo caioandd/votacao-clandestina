@@ -14,7 +14,8 @@
 
   Rotas: landing, landing-encerrada, identificar, identificar-salvo,
           identificar-encerrada, votar, revisar, enviado, encerrada, regulamento,
-          privacidade, admin, admin-porta, ranking, times, cedulas, ajustes.
+          privacidade, admin, admin-porta, ranking, times, cedulas, ajustes,
+          copa, copa-publica, copa-cheia, copa-nomes.
   Opções: --w <largura> --h <altura> --out <arquivo.png> --base <url>
           --act "<js>" (roda antes da foto) --settle <ms> --profile <dir>
 */
@@ -80,6 +81,33 @@ const SEED_BALLOTS = BOOT.replace('__RESULT__ = { ok: true }', `
   await adapter.seedDemoBallots(24)
   __RESULT__ = { ballots: (await adapter.listBallots()).length }`)
 
+// Copa: logado como organização, chave vazia (placeholders em tudo).
+const SEED_COPA = BOOT.replace('__RESULT__ = { ok: true }', `
+  await adapter.signIn()
+  __RESULT__ = { ok: true }`)
+
+// Copa cheia: grupos completos, semis decididas, final nos pênaltis e 3º lugar
+// também nos pênaltis — exercita tabelas, chaveamento, pódio e a linha de pênaltis.
+const SEED_COPA_CHEIA = BOOT.replace('__RESULT__ = { ok: true }', `
+  await adapter.signIn()
+  const set = (id, home, away, hp = null, ap = null) => adapter.setMatchScore(id, home, away, hp, ap)
+  await set('ga1', 3, 2)
+  await set('ga2', 1, 1)
+  await set('ga3', 4, 0)
+  await set('gb1', 2, 2)
+  await set('gb2', 3, 1)
+  await set('gb3', 0, 2)
+  await set('sf1', 3, 1)
+  await set('sf2', 2, 4)
+  await set('final', 3, 3, 4, 3)
+  await set('third', 2, 2, 2, 4)
+  const names = {
+    a1: 'Os Clandestinos', a2: 'Resenha FC', a3: 'Bonde da Elétrica',
+    b1: 'Time do Povo', b2: 'Vila Nova', b3: 'Atlético Clandestino',
+  }
+  for (const [id, name] of Object.entries(names)) await adapter.setTeamName(id, name)
+  __RESULT__ = { ok: true }`)
+
 const click = (t) => `{ const btn = [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === ${JSON.stringify(t)}); if (btn) btn.click() }`
 const clickHas = (t) => `{ const btn = [...document.querySelectorAll('button')].find((x) => x.textContent.includes(${JSON.stringify(t)})); if (btn) btn.click() }`
 const pause = (ms) => `; await new Promise((r) => setTimeout(r, ${ms}));`
@@ -106,6 +134,14 @@ const PRESETS = {
   },
   cedulas: { path: '/admin', seed: SEED_BALLOTS, act: click('Cédulas') + pause(300) },
   ajustes: { path: '/admin', seed: SEED_BALLOTS, act: click('Ajustes') + pause(300) },
+  copa: { path: '/copa', seed: SEED_COPA },
+  'copa-publica': { path: '/copa', seed: BOOT },
+  'copa-cheia': { path: '/copa', seed: SEED_COPA_CHEIA },
+  'copa-nomes': {
+    path: '/copa',
+    seed: SEED_COPA_CHEIA,
+    act: clickHas('Editar nomes') + pause(300),
+  },
 }
 const preset = PRESETS[route]
 if (!preset) {

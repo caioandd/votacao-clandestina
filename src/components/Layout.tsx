@@ -40,10 +40,12 @@ export function AppShell({
   children,
   right,
   showHeader = true,
+  subtitle = 'Votação oficial',
 }: {
   children: ReactNode
   right?: ReactNode
   showHeader?: boolean
+  subtitle?: string
 }) {
   return (
     <>
@@ -57,7 +59,7 @@ export function AppShell({
                   3ª Copa Clandestina
                 </span>
                 <span className="mt-0.5 hidden text-[10px] font-semibold uppercase tracking-[0.24em] text-ash sm:block">
-                  Votação oficial
+                  {subtitle}
                 </span>
               </span>
             </Link>
@@ -74,6 +76,9 @@ export function AppShell({
             3ª Copa Clandestina de Futsal · 28/11 às 8h · Quadra Poliesportiva — IFBA
           </p>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <Link to="/copa" className="transition-colors hover:text-paper">
+              Tabela do campeonato
+            </Link>
             <Link to="/regulamento" className="transition-colors hover:text-paper">
               Regulamento da votação
             </Link>

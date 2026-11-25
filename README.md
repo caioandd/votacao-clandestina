@@ -171,7 +171,10 @@ como “não sei” e pode editar o voto até o prazo.
 **Prazo**: vale sempre o horário do servidor. Depois dele, envio e edição são
 recusados no banco, mesmo que alguém tente burlar o site.
 
-**Encerrar antes**: mude o prazo para agora e salve.
+**Encerrar a votação** (Ajustes → *Encerrar agora*): fecha na hora. A partir daí
+o site avisa “resultados em breve”: ninguém vota, edita ou entra na votação —
+só a tela de encerramento (e regulamento/privacidade) continua acessível. Para
+reabrir, mude o prazo para uma data futura e salve.
 
 **Antes de divulgar os times**: baixe os CSVs (Ranking, Cédulas e Times) como
 backup.

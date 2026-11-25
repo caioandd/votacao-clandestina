@@ -746,7 +746,8 @@ function SettingsTab({
       <div className="flex flex-col gap-3">
         <h2 className="text-[16px] font-semibold text-paper">Prazo final</h2>
         <p className="text-[13px] text-ash-600">
-          Horário de Brasília. Depois desse momento o servidor recusa qualquer envio ou edição.
+          Horário de Brasília. Depois desse momento o servidor recusa qualquer envio ou edição, e o
+          site passa a avisar que os resultados saem em breve. Para fechar já, use “Encerrar agora”.
         </p>
         <div className="flex flex-wrap items-end gap-3">
           <input
@@ -762,6 +763,22 @@ function SettingsTab({
             }
           >
             Salvar prazo
+          </Button>
+          <Button
+            variant="ghost"
+            disabled={busy}
+            onClick={() => {
+              const ok = window.confirm(
+                'Encerrar a votação agora? Ninguém mais consegue enviar ou editar votos. Dá para reabrir mudando o prazo acima.',
+              )
+              if (!ok) return
+              void run(
+                () => data.setDeadline(new Date().toISOString()),
+                'Votação encerrada. O site já mostra o aviso de resultados em breve.',
+              )
+            }}
+          >
+            Encerrar agora
           </Button>
         </div>
       </div>

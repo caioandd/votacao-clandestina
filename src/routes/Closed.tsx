@@ -22,17 +22,16 @@ export function Closed() {
           <header className="flex flex-col gap-3">
             <Kicker>Votação encerrada</Kicker>
             <h1 className="display text-[38px] leading-none text-paper sm:text-[46px]">
-              O prazo acabou
+              Resultados em breve
             </h1>
-            <p className="max-w-lg text-[15px] leading-relaxed text-ash">
-              {ballot
-                ? `Seus votos da versão ${ballot.revision} estão registrados e não podem mais ser alterados.`
-                : 'Você não registrou votos nesta votação.'}
-              {ballot ? ` Última atualização em ${formatDateTime(ballot.updatedAt)}.` : ''}
+            <p className="max-w-lg text-[16px] leading-relaxed text-paper">
+              Os resultados serão divulgados em breve pela organização da 3ª Copa Clandestina, que
+              já está usando as notas para montar os 6 times equilibrados.
             </p>
             <p className="max-w-lg text-[15px] leading-relaxed text-ash">
-              A organização já está usando as notas para montar os 6 times equilibrados. O resultado
-              é divulgado só pela organização da 3ª Copa Clandestina.
+              {ballot
+                ? `Seus votos da versão ${ballot.revision} estão registrados e não podem mais ser alterados. Última atualização em ${formatDateTime(ballot.updatedAt)}.`
+                : 'Você não registrou votos nesta votação.'}
             </p>
           </header>
 

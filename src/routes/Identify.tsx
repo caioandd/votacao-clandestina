@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { AppShell, PageContainer } from '../components/Layout'
 import { Button, Kicker } from '../components/ui'
 import { useApp } from '../state/AppProvider'
@@ -7,7 +7,7 @@ import { checkFullName, NAME_MAX } from '../lib/validation'
 import { formatShortDeadline } from '../lib/deadline'
 
 export function Identify() {
-  const { booting, publicState, voterName, identify, forgetVoter } = useApp()
+  const { booting, publicState, phase, voterName, identify, forgetVoter } = useApp()
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [consent, setConsent] = useState(false)
@@ -22,6 +22,7 @@ export function Identify() {
   }, [hydrated, booting, voterName])
 
   if (booting) return null
+  if (phase === 'closed') return <Navigate to="/encerrada" replace />
 
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault()

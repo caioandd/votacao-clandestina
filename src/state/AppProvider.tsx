@@ -15,6 +15,7 @@ import {
   saveVoter,
   type VoterCookie,
 } from '../lib/cookie'
+import { useNow } from '../hooks/useNow'
 import { phaseOf } from '../lib/deadline'
 import type { Ballot, Phase, Player, PublicState, SessionUser, SubmitResult } from '../lib/types'
 
@@ -56,6 +57,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [ballot, setBallot] = useState<Ballot | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
+  // Relógio da fase: quando o prazo passa com a página aberta, as telas de
+  // votação fecham sozinhas (o banco também recusa qualquer envio depois dele).
+  const tick = useNow(15000)
 
   const voterId = voter?.id ?? session?.id ?? null
   const voterName = ballot?.fullName ?? voter?.name ?? session?.displayName ?? null
@@ -202,7 +206,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       voterId,
       voterName,
       publicState,
-      phase: publicState ? phaseOf(publicState) : 'open',
+      phase: publicState ? phaseOf(publicState, tick) : 'open',
       players,
       ballot,
       isAdmin,
@@ -220,6 +224,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       voterId,
       voterName,
       publicState,
+      tick,
       players,
       ballot,
       isAdmin,

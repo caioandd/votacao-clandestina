@@ -47,12 +47,17 @@ export function Landing() {
   const closed = phase === 'closed'
 
   function handlePrimary() {
-    if (closed && !ballot) return
+    if (closed) {
+      if (ballot) navigate('/encerrada')
+      return
+    }
     navigate(ballot ? '/votar' : '/entrar')
   }
 
-  const primaryLabel = closed && !ballot
-    ? 'Votação encerrada'
+  const primaryLabel = closed
+    ? ballot
+      ? 'Ver meus votos'
+      : 'Votação encerrada'
     : ballot
       ? 'Editar meus votos'
       : 'Começar a votar'
@@ -75,10 +80,19 @@ export function Landing() {
                 as notas para montar os <strong>6 times</strong> equilibrados da copa.
               </p>
 
-              {countdown ? (
+              {closed ? (
+                <div className="hero-alert">
+                  <p className="hero-alert__title">Votação encerrada</p>
+                  <p>
+                    As notas já foram para a organização, que está montando os 6 times equilibrados.
+                    <strong className="text-paper"> Os resultados serão divulgados em breve</strong>{' '}
+                    pela organização da 3ª Copa Clandestina.
+                  </p>
+                </div>
+              ) : countdown ? (
                 <p className="hero-timer">
-                  <span>{closed ? 'Encerrada' : 'Fecha em'}</span>
-                  <b>{closed ? '00h 00m' : formatCountdown(countdown)}</b>
+                  <span>Fecha em</span>
+                  <b>{formatCountdown(countdown)}</b>
                 </p>
               ) : null}
 

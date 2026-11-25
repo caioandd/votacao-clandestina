@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { AppShell, PageContainer } from '../components/Layout'
 import { PlayerVoteRow } from '../components/PlayerVoteRow'
 import type { Rating } from '../components/StarRating'
@@ -12,7 +12,7 @@ import { answeredCount, missingCount } from '../lib/validation'
 import { formatShortDeadline } from '../lib/deadline'
 
 export function Vote() {
-  const { voterId, voterName, players, ballot, publicState, phase, loadError, refresh } = useApp()
+  const { voterId, voterName, players, ballot, publicState, loadError, refresh } = useApp()
   const now = useNow(1000)
   const navigate = useNavigate()
   const [scores, setScores] = useState<Record<string, number | null>>({})
@@ -38,8 +38,6 @@ export function Vote() {
   const answered = useMemo(() => answeredCount(players, scores), [players, scores])
   const missing = useMemo(() => missingCount(players, scores), [players, scores])
   const total = players.length
-
-  if (phase === 'closed') return <Navigate to="/encerrada" replace />
 
   function handleChange(playerId: string, value: Rating) {
     if (!voterId) return

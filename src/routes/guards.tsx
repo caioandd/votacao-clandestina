@@ -14,8 +14,11 @@ export function Splash({ label = 'Carregando' }: { label?: string }) {
 }
 
 export function RequireVoter({ children }: { children: ReactNode }) {
-  const { booting, voterId } = useApp()
+  const { booting, voterId, phase } = useApp()
   if (booting) return <Splash />
   if (!voterId) return <Navigate to="/entrar" replace />
+  // Prazo encerrado: votar, revisar e editar saem do ar; só a tela de
+  // encerramento (com o aviso de resultados) fica acessível.
+  if (phase === 'closed') return <Navigate to="/encerrada" replace />
   return <>{children}</>
 }

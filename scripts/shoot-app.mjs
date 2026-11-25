@@ -12,8 +12,9 @@
     node scripts/shoot-app.mjs --route times   --w 390
     node scripts/shoot-app.mjs --route ranking --w 1440 --out shots/app/1440-ranking.png
 
-  Rotas: identificar, votar, revisar, enviado, encerrada, regulamento,
-          privacidade, admin, ranking, times, cedulas, ajustes.
+  Rotas: landing, landing-encerrada, identificar, identificar-salvo,
+          identificar-encerrada, votar, revisar, enviado, encerrada, regulamento,
+          privacidade, admin, admin-porta, ranking, times, cedulas, ajustes.
   Opções: --w <largura> --h <altura> --out <arquivo.png> --base <url>
           --act "<js>" (roda antes da foto) --settle <ms> --profile <dir>
 */
@@ -85,8 +86,10 @@ const pause = (ms) => `; await new Promise((r) => setTimeout(r, ${ms}));`
 
 const PRESETS = {
   landing: { path: '/', seed: BOOT },
+  'landing-encerrada': { path: '/', seed: BOOT, closed: true },
   identificar: { path: '/entrar', seed: BOOT },
   'identificar-salvo': { path: '/entrar', seed: SEED_DRAFT },
+  'identificar-encerrada': { path: '/entrar', seed: SEED_DRAFT, closed: true },
   votar: { path: '/votar', seed: SEED_DRAFT },
   revisar: { path: '/revisar', seed: SEED_DRAFT },
   enviado: { path: '/enviado', seed: SEED_SUBMITTED },
@@ -271,7 +274,10 @@ try {
     }
     if (!seedResult) throw new Error('seed não retornou')
     if (preset.closed) {
-      await ev(`(() => { const raw = JSON.parse(localStorage.getItem('cd_votacao_demo_v1')); raw.closesAt = '2026-11-20T00:00:00-03:00'; localStorage.setItem('cd_votacao_demo_v1', JSON.stringify(raw)); return 1 })()`)
+      // fecha pelo próprio adaptador: o store pode ainda não existir no localStorage
+      await ev(
+        `(async () => { const { createDemoAdapter } = await import('/src/lib/data/demo.ts'); await createDemoAdapter().setDeadline('2026-11-20T00:00:00-03:00'); return 1 })()`,
+      )
     }
   }
 

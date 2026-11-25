@@ -58,9 +58,12 @@ com a chave inteira editável.
      [`20261124000100_admin_desativar_jogador.sql`](supabase/migrations/20261124000100_admin_desativar_jogador.sql)
      (desativar/reativar jogador), o
      [`20261124000200_voto_por_cookie.sql`](supabase/migrations/20261124000200_voto_por_cookie.sql)
-     (voto por cookie, sem login para quem vota) e o
+     (voto por cookie, sem login para quem vota), o
      [`20261125000100_campeonato.sql`](supabase/migrations/20261125000100_campeonato.sql)
-     (chave do campeonato da página `/copa`). Todos são idempotentes.
+     (chave do campeonato da página `/copa`) e o
+     [`20261125000200_times_do_campeonato.sql`](supabase/migrations/20261125000200_times_do_campeonato.sql)
+     (os seis times da 3ª Copa e a tabela oficial dos jogos). Todos são
+     idempotentes.
 3. Em **Project Settings → API**, copie:
    - **Project URL** → `VITE_SUPABASE_URL`
    - a chave pública → `VITE_SUPABASE_ANON_KEY` (no projeto novo ela aparece como

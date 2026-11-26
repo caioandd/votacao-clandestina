@@ -9,6 +9,7 @@ Anton nos títulos e Inter no texto). Cada `.frame` é um quadro 1080×1080.
 | `01-anuncio.html` | 1 | Anúncio da 3ª Copa (28/11, 8h, IFBA) com QR da tabela |
 | `02-times.html` | 7 | Carrossel: capa + um quadro por time, com integrantes e jogos |
 | `03-chaveamento.html` | 1 | Grupos e chave: semifinais cruzadas, final e 3º lugar com QR |
+| `04-confrontos.html` | 1 | Os três jogos de cada grupo, na ordem divulgada, com QR |
 
 Os integrantes e os jogos seguem a divisão oficial (mesma da página `/copa`).
 O QR aponta para `https://caioandd.github.io/votacao-clandestina/copa`.
@@ -34,6 +35,7 @@ node scripts/shoot-app.mjs --url /artes/02-times.html     --w 1080 --h 1080 --cl
 node scripts/shoot-app.mjs --url /artes/02-times.html     --w 1080 --h 1080 --clip "#time-5"      --out artes/export/02-times-6-time5.png
 node scripts/shoot-app.mjs --url /artes/02-times.html     --w 1080 --h 1080 --clip "#time-6"      --out artes/export/02-times-7-time6.png
 node scripts/shoot-app.mjs --url /artes/03-chaveamento.html --w 1080 --h 1080 --clip "#chaveamento" --out artes/export/03-chaveamento.png
+node scripts/shoot-app.mjs --url /artes/04-confrontos.html  --w 1080 --h 1080 --clip "#confrontos"  --out artes/export/04-confrontos.png
 ```
 
 > A pasta `artes/` fica fora de `public/`: é material de publicação, não vai

@@ -353,3 +353,39 @@ body {
 .ch-note { margin: 0; max-width: 30ch; font-size: 24px; line-height: 1.45; color: var(--ash); }
 .ch-note strong { color: var(--paper); font-weight: 600; }
 .ch-foot .qr-label strong { font-size: 19px; white-space: nowrap; }
+
+/* --------------------------------------------------------- 04 · confrontos */
+
+.fx-head { display: flex; align-items: center; justify-content: space-between; gap: 48px; }
+.fx-head-copy { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.fx-title { font-size: 122px; }
+.fx-plate { flex: none; width: 172px; height: 162px; }
+
+.fx-body { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.fx-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+
+.fx-card { display: flex; flex-direction: column; gap: 22px; padding: 28px 26px 26px; }
+.fx-card__head { display: flex; flex-direction: column; gap: 10px; }
+.fx-card__teams { margin: 0; font-size: 27px; font-weight: 600; color: var(--paper); white-space: nowrap; }
+
+.fx-list { margin: 0; padding: 0; list-style: none; }
+.fx-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  padding: 30px 0;
+  border-top: 2px solid var(--line);
+  font-size: 38px;
+  font-weight: 600;
+  color: var(--paper);
+}
+.fx-list li:first-child { padding-top: 10px; border-top: 0; }
+.fx-list li:last-child { padding-bottom: 16px; border-bottom: 2px solid var(--line); }
+.fx-list .num { flex: none; min-width: 50px; font-family: var(--display); font-size: 30px; color: var(--gold); }
+.fx-list .x { font-family: var(--display); font-size: 32px; color: var(--gold); }
+
+.fx-foot { display: flex; flex-direction: column; gap: 24px; }
+.fx-foot__row { display: flex; align-items: center; justify-content: space-between; gap: 44px; }
+.fx-note { margin: 0; max-width: 36ch; font-size: 23px; line-height: 1.45; color: var(--ash); }
+.fx-note strong { color: var(--paper); font-weight: 600; }
+.fx-foot .qr-label strong { font-size: 19px; white-space: nowrap; }

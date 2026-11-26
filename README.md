@@ -319,7 +319,7 @@ npm run lint      # oxlint
   da página `/copa`, tudo derivado dos placares.
 - `src/lib/validation.ts` — mesmas regras de nome e nota que o banco aplica.
 - `supabase/migrations/` — o SQL aplicado no projeto.
-- `artes/` — artes 1:1 do feed do Instagram (HTML 1080×1080 e PNGs exportados
+- `artes/` — artes 4:5 do feed do Instagram (HTML 1080×1350 e PNGs exportados
   em `artes/export/`), na identidade visual do site; ver `artes/README.md`.
 - `scripts/copy-404.mjs` — copia o `index.html` do build para `404.html`
   (fallback dos links diretos no GitHub Pages).

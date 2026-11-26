@@ -1,9 +1,9 @@
 /* ============================================================================
-   Artes do feed da 3ª Copa Clandestina — 1:1 (1080×1080).
+   Artes do feed da 3ª Copa Clandestina — 4:5 (1080×1350).
    Mesma identidade visual do site: tinta #0e0e10, ouro #f6c400, placa branca
    do escudo com filete dourado, Anton nos títulos e Inter no texto.
    Uso: abra um dos arquivos 0X-*.html no navegador e capture os quadros
-   (.frame) em 1080×1080 — ou rode scripts/shoot-app.mjs (ver artes/README.md).
+   (.frame) em 1080×1350 — ou rode scripts/shoot-app.mjs (ver artes/README.md).
    ============================================================================ */
 
 :root {
@@ -41,7 +41,7 @@ body {
 .frame {
   position: relative;
   width: 1080px;
-  height: 1080px;
+  height: 1350px;
   overflow: hidden;
   padding: 56px 84px 48px;
   display: flex;
@@ -78,7 +78,7 @@ body {
 }
 .kicker .dot { width: 13px; height: 13px; border-radius: 999px; background: var(--gold); flex: none; }
 
-.lead { margin: 0; font-size: 28px; line-height: 1.5; color: var(--ash); }
+.lead { margin: 0; font-size: 30px; line-height: 1.5; color: var(--ash); }
 
 .hairline { border: 0; border-top: 2px solid var(--line); margin: 0; }
 
@@ -103,11 +103,11 @@ body {
 .chip {
   display: inline-flex;
   align-items: center;
-  height: 54px;
+  height: 58px;
   padding: 0 26px;
   border: 2px solid var(--line-2);
   border-radius: 999px;
-  font-size: 21px;
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -135,8 +135,8 @@ body {
 .qr-row { display: flex; align-items: center; gap: 24px; }
 .qr-chip {
   flex: none;
-  width: 124px;
-  height: 124px;
+  width: 144px;
+  height: 144px;
   padding: 12px;
   border-radius: 16px;
   background: var(--paper);
@@ -144,13 +144,13 @@ body {
 .qr-chip img { display: block; width: 100%; height: 100%; }
 .qr-label strong {
   display: block;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--gold);
 }
-.qr-label span { font-size: 19px; line-height: 1.45; color: var(--ash-600); }
+.qr-label span { font-size: 20px; line-height: 1.45; color: var(--ash-600); }
 
 /* ============================================================================
    FOLHAS DAS ARTES
@@ -170,13 +170,13 @@ body {
 }
 .facts > div { display: grid; gap: 8px; align-content: start; }
 .facts dt {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--ash-600);
 }
-.facts dd { margin: 0; font-size: 26px; font-weight: 500; color: var(--paper); }
+.facts dd { margin: 0; font-size: 28px; font-weight: 500; color: var(--paper); }
 
 /* ------------------------------------------------------------ 01 · anúncio */
 
@@ -186,37 +186,37 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 34px;
+  gap: 44px;
   text-align: center;
 }
-.an-plate { flex: none; width: 336px; height: 276px; }
-.an-title { font-size: 134px; }
+.an-plate { flex: none; width: 392px; height: 336px; }
+.an-title { font-size: 156px; }
 .an-title .gold { color: var(--gold); }
 .an-lead { max-width: 720px; }
 .an-lead strong { color: var(--paper); font-weight: 600; }
-.an-foot { display: flex; flex-direction: column; gap: 22px; }
+.an-foot { display: flex; flex-direction: column; gap: 26px; }
 
 /* -------------------------------------------------------------- 02 · times */
 
 .tf-top { display: flex; align-items: center; justify-content: space-between; }
 
 /* capa */
-.cover-head { display: flex; align-items: center; gap: 52px; margin-top: 44px; }
-.cover-plate { flex: none; width: 400px; height: 376px; }
+.cover-head { display: flex; align-items: center; gap: 56px; margin-top: 56px; }
+.cover-plate { flex: none; width: 448px; height: 420px; }
 .cover-titles { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
-.cover-title { font-size: 138px; }
+.cover-title { font-size: 152px; }
 .cover-title .gold { color: var(--gold); }
 
 .cover-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; margin-top: auto; }
-.group-box { padding: 24px 30px 28px; display: flex; flex-direction: column; gap: 14px; }
+.group-box { padding: 30px 34px 34px; display: flex; flex-direction: column; gap: 14px; }
 .group-list { margin: 0; padding: 0; list-style: none; }
 .group-list li {
   display: flex;
   align-items: center;
   gap: 18px;
-  padding: 13px 0;
+  padding: 20px 0;
   border-top: 2px solid var(--line);
-  font-size: 31px;
+  font-size: 33px;
   font-weight: 600;
   color: var(--paper);
 }
@@ -229,24 +229,24 @@ body {
   background: var(--gold);
 }
 
-.cover-facts { margin-top: 42px; }
+.cover-facts { margin-top: auto; }
 
 .tf-foot {
-  margin-top: 36px;
-  padding-top: 26px;
+  margin-top: 44px;
+  padding-top: 30px;
   border-top: 2px solid var(--line);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 23px;
+  font-size: 24px;
   font-weight: 600;
   color: var(--ash-600);
 }
-.tf-foot .arrow { color: var(--gold); font-size: 30px; }
+.tf-foot .arrow { color: var(--gold); font-size: 32px; }
 
 /* quadro de um time */
 .time-head { display: flex; flex-direction: column; align-items: flex-start; gap: 24px; margin-top: 34px; }
-.tf-name { font-size: 160px; }
+.tf-name { font-size: 184px; }
 
 .tf-block { display: flex; flex-direction: column; gap: 18px; margin-top: 48px; }
 .tf-block--games { margin-top: auto; }
@@ -256,9 +256,9 @@ body {
   display: flex;
   align-items: baseline;
   gap: 26px;
-  padding: 20px 0;
+  padding: 32px 0;
   border-top: 2px solid var(--line);
-  font-size: 33px;
+  font-size: 36px;
   font-weight: 600;
   color: var(--paper);
 }
@@ -267,7 +267,7 @@ body {
   flex: none;
   min-width: 56px;
   font-family: var(--display);
-  font-size: 28px;
+  font-size: 31px;
   color: var(--gold);
 }
 
@@ -276,18 +276,18 @@ body {
   display: flex;
   align-items: baseline;
   gap: 18px;
-  font-size: 32px;
+  font-size: 34px;
   font-weight: 600;
   color: var(--paper);
 }
-.games .x { font-family: var(--display); font-size: 28px; color: var(--gold); }
+.games .x { font-family: var(--display); font-size: 30px; color: var(--gold); }
 
 /* --------------------------------------------------------- 03 · chaveamento */
 
 .ch-head { display: flex; align-items: center; justify-content: space-between; gap: 48px; }
 .ch-head-copy { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .ch-title { font-size: 122px; }
-.ch-plate { flex: none; width: 172px; height: 162px; }
+.ch-plate { flex: none; width: 204px; height: 192px; }
 
 .ch-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; margin-top: 30px; }
 .group-strip {
@@ -295,27 +295,27 @@ body {
   flex-direction: column;
   align-items: flex-start;
   gap: 10px;
-  padding: 20px 26px 22px;
+  padding: 26px 30px 28px;
 }
-.group-strip .teams { margin: 0; font-size: 27px; font-weight: 600; color: var(--paper); white-space: nowrap; }
+.group-strip .teams { margin: 0; font-size: 30px; font-weight: 600; color: var(--paper); white-space: nowrap; }
 
-.bracket { position: relative; height: 486px; margin-top: 28px; }
+.bracket { position: relative; height: 600px; margin-top: 28px; }
 .bracket .wires { position: absolute; inset: 0; width: 100%; height: 100%; }
 
 .match {
   position: absolute;
-  width: 320px;
-  padding: 15px 22px 17px;
+  width: 360px;
+  padding: 20px 26px 22px;
   border-radius: 18px;
   background: var(--surface);
   border: 2px solid var(--line-2);
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 12px;
 }
 .match .match__label {
   margin: 0;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -326,7 +326,7 @@ body {
   display: flex;
   align-items: baseline;
   gap: 14px;
-  font-size: 25px;
+  font-size: 27px;
   font-weight: 600;
   color: var(--paper);
   white-space: nowrap;
@@ -335,7 +335,7 @@ body {
   flex: none;
   min-width: 36px;
   font-family: var(--display);
-  font-size: 23px;
+  font-size: 25px;
   color: var(--gold);
 }
 .match--final { border-color: rgb(246 196 0 / 0.55); }
@@ -343,49 +343,52 @@ body {
 .match--third { border-style: dashed; }
 .match--third .match__label { color: var(--gold); }
 
-.m-sf1 { left: 0; top: 58px; }
-.m-sf2 { left: 0; top: 298px; }
-.m-final { left: 592px; top: 178px; }
-.m-third { left: 592px; top: 342px; }
+.m-sf1 { left: 0; top: 70px; }
+.m-sf2 { left: 0; top: 366px; }
+.m-final { left: 552px; top: 218px; }
+.m-third { left: 552px; top: 418px; }
 
 .ch-foot { margin-top: auto; display: flex; flex-direction: column; gap: 24px; }
 .ch-foot__row { display: flex; align-items: center; justify-content: space-between; gap: 44px; }
-.ch-note { margin: 0; max-width: 30ch; font-size: 24px; line-height: 1.45; color: var(--ash); }
+.ch-note { margin: 0; max-width: 32ch; font-size: 25px; line-height: 1.45; color: var(--ash); }
 .ch-note strong { color: var(--paper); font-weight: 600; }
-.ch-foot .qr-label strong { font-size: 19px; white-space: nowrap; }
+.ch-foot .qr-label strong { font-size: 20px; white-space: nowrap; }
 
 /* --------------------------------------------------------- 04 · confrontos */
 
 .fx-head { display: flex; align-items: center; justify-content: space-between; gap: 48px; }
 .fx-head-copy { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-.fx-title { font-size: 122px; }
-.fx-plate { flex: none; width: 172px; height: 162px; }
+.fx-title { font-size: 136px; }
+.fx-plate { flex: none; width: 204px; height: 192px; }
 
 .fx-body { flex: 1; display: flex; flex-direction: column; justify-content: center; }
-.fx-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+.fx-groups { display: flex; flex-direction: column; gap: 32px; }
 
 .fx-card { display: flex; flex-direction: column; gap: 22px; padding: 28px 26px 26px; }
-.fx-card__head { display: flex; flex-direction: column; gap: 10px; }
-.fx-card__teams { margin: 0; font-size: 27px; font-weight: 600; color: var(--paper); white-space: nowrap; }
+.fx-card__head { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; }
+.fx-card__teams { margin: 0; font-size: 30px; font-weight: 600; color: var(--paper); white-space: nowrap; }
 
 .fx-list { margin: 0; padding: 0; list-style: none; }
 .fx-list li {
-  display: flex;
+  display: grid;
+  grid-template-columns: 50px minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: baseline;
-  gap: 20px;
-  padding: 30px 0;
+  column-gap: 20px;
+  padding: 24px 0;
   border-top: 2px solid var(--line);
-  font-size: 38px;
+  font-size: 42px;
   font-weight: 600;
   color: var(--paper);
 }
-.fx-list li:first-child { padding-top: 10px; border-top: 0; }
-.fx-list li:last-child { padding-bottom: 16px; border-bottom: 2px solid var(--line); }
-.fx-list .num { flex: none; min-width: 50px; font-family: var(--display); font-size: 30px; color: var(--gold); }
-.fx-list .x { font-family: var(--display); font-size: 32px; color: var(--gold); }
+.fx-list li > span:nth-child(2) { text-align: right; }
+.fx-list li > span:nth-child(4) { text-align: left; }
+.fx-list li:first-child { padding-top: 6px; border-top: 0; }
+.fx-list li:last-child { padding-bottom: 14px; border-bottom: 2px solid var(--line); }
+.fx-list .num { flex: none; min-width: 50px; font-family: var(--display); font-size: 33px; color: var(--gold); }
+.fx-list .x { font-family: var(--display); font-size: 34px; color: var(--gold); }
 
 .fx-foot { display: flex; flex-direction: column; gap: 24px; }
 .fx-foot__row { display: flex; align-items: center; justify-content: space-between; gap: 44px; }
-.fx-note { margin: 0; max-width: 36ch; font-size: 23px; line-height: 1.45; color: var(--ash); }
+.fx-note { margin: 0; max-width: 36ch; font-size: 24px; line-height: 1.45; color: var(--ash); }
 .fx-note strong { color: var(--paper); font-weight: 600; }
-.fx-foot .qr-label strong { font-size: 19px; white-space: nowrap; }
+.fx-foot .qr-label strong { font-size: 20px; white-space: nowrap; }

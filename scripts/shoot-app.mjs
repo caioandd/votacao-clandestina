@@ -17,6 +17,7 @@
           privacidade, admin, admin-porta, ranking, times, cedulas, ajustes,
           copa, copa-publica, copa-cheia, copa-publica-cheia, copa-times-salvo.
   Opções: --w <largura> --h <altura> --out <arquivo.png> --base <url>
+          --url <caminho> (página direta, sem seed — ex.: /artes/01-anuncio.html)
           --act "<js>" (roda antes da foto) --settle <ms> --profile <dir>
 */
 
@@ -32,11 +33,13 @@ const opt = (k, d) => {
 
 const HEIGHTS = { 360: 780, 390: 844, 414: 896, 430: 932, 768: 1024, 820: 1180, 1024: 768, 1280: 800, 1440: 900 }
 const route = String(opt('route', 'votar'))
+const urlPath = opt('url') && opt('url') !== true ? String(opt('url')) : null
 const W = +opt('w', 390)
 const VH = +opt('h', HEIGHTS[W] || 900)
 const DSF = +opt('dsf', W < 600 ? 2 : 1)
 const clipSel = opt('clip') && opt('clip') !== true ? String(opt('clip')) : null
-const out = String(opt('out', `shots/app/${W}-${route}${clipSel ? '-clip' : ''}.png`))
+const label = (urlPath || route).replace(/^[/\\]+/, '').replace(/[^\w.-]+/g, '-') || 'pagina'
+const out = String(opt('out', `shots/app/${W}-${label}${clipSel ? '-clip' : ''}.png`))
 const base = String(opt('base', 'http://localhost:5180')).replace(/\/$/, '')
 const settle = +opt('settle', 900)
 const extraAct = opt('act') && opt('act') !== true ? String(opt('act')) : null
@@ -175,7 +178,7 @@ const PRESETS = {
   'copa-publica-cheia': { path: '/copa', seed: SEED_COPA_PUBLICA_CHEIA },
   'copa-times-salvo': { path: '/copa', seed: SEED_COPA_CHEIA, act: TYPE_MEMBERS },
 }
-const preset = PRESETS[route]
+const preset = urlPath ? { path: urlPath } : PRESETS[route]
 if (!preset) {
   console.error(`rota desconhecida: ${route}\nopções: ${Object.keys(PRESETS).join(', ')}`)
   process.exit(1)
@@ -326,10 +329,13 @@ try {
   }
 
   // 1. abre o app uma vez para ter o módulo do adaptador disponível
-  const l1 = nextLoad()
-  await S('Page.navigate', { url: `${base}/` })
-  await Promise.race([l1, sleep(20000)])
-  await settleAfterLoad()
+  //    (com --url é uma página direta, sem seed — nem abre o app)
+  if (!urlPath) {
+    const l1 = nextLoad()
+    await S('Page.navigate', { url: `${base}/` })
+    await Promise.race([l1, sleep(20000)])
+    await settleAfterLoad()
+  }
 
   // 2. semeia o estado pelo próprio adaptador demo
   let seedResult = null

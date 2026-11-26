@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>3ª Copa Clandestina · Chaveamento (1080×1080)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="arte.css" />
+  </head>
+  <body>
+    <!-- Quadro 1 (1/1) · grupos e chave: semifinais cruzadas, final e 3º lugar. -->
+    <div class="frame chave" id="chaveamento">
+      <header class="ch-head">
+        <div class="ch-head-copy">
+          <p class="kicker"><span class="dot" aria-hidden="true"></span>3ª Copa Clandestina · 28/11</p>
+          <h1 class="display ch-title">Chaveamento</h1>
+        </div>
+        <div class="plate ch-plate">
+          <img src="assets/escudo.png" alt="Escudo da Clandestina Futebol Clube" />
+        </div>
+      </header>
+
+      <div class="ch-groups">
+        <div class="card group-strip">
+          <p class="tag tag--gold">Grupo A</p>
+          <p class="teams">Time 5 · Time 2 · Time 1</p>
+        </div>
+        <div class="card group-strip">
+          <p class="tag tag--gold">Grupo B</p>
+          <p class="teams">Time 3 · Time 4 · Time 6</p>
+        </div>
+      </div>
+
+      <div class="bracket">
+        <svg class="wires" viewBox="0 0 912 486" fill="none" aria-hidden="true">
+          <path d="M 320 122.5 H 456 V 242.5 H 592" stroke="#3a3a40" stroke-width="3" />
+          <path d="M 320 362.5 H 456 V 242.5" stroke="#3a3a40" stroke-width="3" />
+          <path
+            d="M 456 242.5 V 406.5 H 592"
+            stroke="#3a3a40"
+            stroke-width="3"
+            stroke-dasharray="10 12"
+          />
+        </svg>
+
+        <article class="match m-sf1">
+          <p class="match__label">Semifinal 1</p>
+          <p class="match__row"><span class="seed">1º</span><span>Grupo A</span></p>
+          <p class="match__row"><span class="seed">2º</span><span>Grupo B</span></p>
+        </article>
+
+        <article class="match m-sf2">
+          <p class="match__label">Semifinal 2</p>
+          <p class="match__row"><span class="seed">2º</span><span>Grupo A</span></p>
+          <p class="match__row"><span class="seed">1º</span><span>Grupo B</span></p>
+        </article>
+
+        <article class="match match--final m-final">
+          <p class="match__label">Final</p>
+          <p class="match__row"><span>Vencedor da semi 1</span></p>
+          <p class="match__row"><span>Vencedor da semi 2</span></p>
+        </article>
+
+        <article class="match match--third m-third">
+          <p class="match__label">Disputa de 3º lugar</p>
+          <p class="match__row"><span>Perdedor da semi 1</span></p>
+          <p class="match__row"><span>Perdedor da semi 2</span></p>
+        </article>
+      </div>
+
+      <footer class="ch-foot">
+        <hr class="hairline" />
+        <div class="ch-foot__row">
+          <p class="ch-note">
+            Os <strong>2 primeiros</strong> de cada grupo avançam. Empate no mata-mata é decidido
+            nos <strong>pênaltis</strong>.
+          </p>
+          <div class="qr-row">
+            <span class="qr-chip"><img src="assets/qr-copa.png" alt="QR code da tabela da copa" /></span>
+            <span class="qr-label">
+              <strong>Acompanhe ao vivo</strong>
+              <span>Placares e chaveamento durante os jogos.</span>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

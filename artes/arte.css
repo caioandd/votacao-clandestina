@@ -1,0 +1,355 @@
+/* ============================================================================
+   Artes do feed da 3ª Copa Clandestina — 1:1 (1080×1080).
+   Mesma identidade visual do site: tinta #0e0e10, ouro #f6c400, placa branca
+   do escudo com filete dourado, Anton nos títulos e Inter no texto.
+   Uso: abra um dos arquivos 0X-*.html no navegador e capture os quadros
+   (.frame) em 1080×1080 — ou rode scripts/shoot-app.mjs (ver artes/README.md).
+   ============================================================================ */
+
+:root {
+  --ink: #0e0e10;
+  --surface: #16161a;
+  --surface-2: #1e1e22;
+  --line: #2a2a2e;
+  --line-2: #3a3a40;
+  --paper: #ffffff;
+  --gold: #f6c400;
+  --gold-deep: #c99e00;
+  --ash: #b5b5ba;
+  --ash-600: #7c7c84;
+  --display: 'Anton', 'Arial Narrow', Impact, sans-serif;
+  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { scrollbar-width: none; }
+html::-webkit-scrollbar,
+body::-webkit-scrollbar { width: 0; height: 0; }
+
+body {
+  margin: 0;
+  background: #060607;
+  color: var(--paper);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---------------------------------------------------------------- quadro 1:1 */
+
+.frame {
+  position: relative;
+  width: 1080px;
+  height: 1080px;
+  overflow: hidden;
+  padding: 56px 84px 48px;
+  display: flex;
+  flex-direction: column;
+  color: var(--paper);
+  background:
+    radial-gradient(130% 90% at 50% -10%, #1b1b22 0%, #101014 46%, var(--ink) 100%);
+}
+
+/* respiro só para pré-visualizar vários quadros na tela */
+.frame + .frame { margin-top: 48px; }
+
+/* ------------------------------------------------------------------- base */
+
+.display {
+  font-family: var(--display);
+  font-weight: 400;
+  letter-spacing: 0.005em;
+  line-height: 0.94;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  font-size: 23px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.kicker .dot { width: 13px; height: 13px; border-radius: 999px; background: var(--gold); flex: none; }
+
+.lead { margin: 0; font-size: 28px; line-height: 1.5; color: var(--ash); }
+
+.hairline { border: 0; border-top: 2px solid var(--line); margin: 0; }
+
+.marker {
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--ash-600);
+  font-variant-numeric: tabular-nums;
+}
+
+.tag {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ash-600);
+  margin: 0;
+}
+.tag--gold { color: var(--gold); }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  height: 54px;
+  padding: 0 26px;
+  border: 2px solid var(--line-2);
+  border-radius: 999px;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+.chip--gold { color: var(--gold); border-color: rgb(246 196 0 / 0.45); }
+
+.card {
+  background: var(--surface);
+  border: 2px solid var(--line-2);
+  border-radius: 20px;
+}
+
+/* placa branca do escudo, como na landing do site */
+.plate {
+  background: var(--paper);
+  border-bottom: 14px solid var(--gold);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.plate img { width: 100%; height: 100%; object-fit: contain; padding: 4%; }
+
+/* rodapé com QR para a página da copa */
+.qr-row { display: flex; align-items: center; gap: 24px; }
+.qr-chip {
+  flex: none;
+  width: 124px;
+  height: 124px;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--paper);
+}
+.qr-chip img { display: block; width: 100%; height: 100%; }
+.qr-label strong {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.qr-label span { font-size: 19px; line-height: 1.45; color: var(--ash-600); }
+
+/* ============================================================================
+   FOLHAS DAS ARTES
+   ----------------------------------------------------------------------------
+   01 · anúncio   →  .anuncio
+   02 · times     →  .cover (capa) e .time (um quadro por time)
+   03 · chave     →  .chave
+   ============================================================================ */
+
+/* ----------------------------------------------------------- campos comuns */
+
+.facts {
+  display: grid;
+  grid-template-columns: 0.9fr 0.6fr 1.5fr;
+  gap: 0 36px;
+  margin: 0;
+}
+.facts > div { display: grid; gap: 8px; align-content: start; }
+.facts dt {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ash-600);
+}
+.facts dd { margin: 0; font-size: 26px; font-weight: 500; color: var(--paper); }
+
+/* ------------------------------------------------------------ 01 · anúncio */
+
+.an-hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 34px;
+  text-align: center;
+}
+.an-plate { flex: none; width: 336px; height: 276px; }
+.an-title { font-size: 134px; }
+.an-title .gold { color: var(--gold); }
+.an-lead { max-width: 720px; }
+.an-lead strong { color: var(--paper); font-weight: 600; }
+.an-foot { display: flex; flex-direction: column; gap: 22px; }
+
+/* -------------------------------------------------------------- 02 · times */
+
+.tf-top { display: flex; align-items: center; justify-content: space-between; }
+
+/* capa */
+.cover-head { display: flex; align-items: center; gap: 52px; margin-top: 44px; }
+.cover-plate { flex: none; width: 400px; height: 376px; }
+.cover-titles { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.cover-title { font-size: 138px; }
+.cover-title .gold { color: var(--gold); }
+
+.cover-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; margin-top: auto; }
+.group-box { padding: 24px 30px 28px; display: flex; flex-direction: column; gap: 14px; }
+.group-list { margin: 0; padding: 0; list-style: none; }
+.group-list li {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 13px 0;
+  border-top: 2px solid var(--line);
+  font-size: 31px;
+  font-weight: 600;
+  color: var(--paper);
+}
+.group-list li:first-child { border-top: 0; padding-top: 4px; }
+.group-list li::before {
+  content: '';
+  flex: none;
+  width: 20px;
+  height: 20px;
+  background: var(--gold);
+}
+
+.cover-facts { margin-top: 42px; }
+
+.tf-foot {
+  margin-top: 36px;
+  padding-top: 26px;
+  border-top: 2px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 23px;
+  font-weight: 600;
+  color: var(--ash-600);
+}
+.tf-foot .arrow { color: var(--gold); font-size: 30px; }
+
+/* quadro de um time */
+.time-head { display: flex; flex-direction: column; align-items: flex-start; gap: 24px; margin-top: 34px; }
+.tf-name { font-size: 160px; }
+
+.tf-block { display: flex; flex-direction: column; gap: 18px; margin-top: 48px; }
+.tf-block--games { margin-top: auto; }
+
+.members { margin: 0; padding: 0; list-style: none; }
+.members li {
+  display: flex;
+  align-items: baseline;
+  gap: 26px;
+  padding: 20px 0;
+  border-top: 2px solid var(--line);
+  font-size: 33px;
+  font-weight: 600;
+  color: var(--paper);
+}
+.members li:last-child { border-bottom: 2px solid var(--line); }
+.members .num {
+  flex: none;
+  min-width: 56px;
+  font-family: var(--display);
+  font-size: 28px;
+  color: var(--gold);
+}
+
+.games { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 16px; }
+.games li {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--paper);
+}
+.games .x { font-family: var(--display); font-size: 28px; color: var(--gold); }
+
+/* --------------------------------------------------------- 03 · chaveamento */
+
+.ch-head { display: flex; align-items: center; justify-content: space-between; gap: 48px; }
+.ch-head-copy { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.ch-title { font-size: 122px; }
+.ch-plate { flex: none; width: 172px; height: 162px; }
+
+.ch-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; margin-top: 30px; }
+.group-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 20px 26px 22px;
+}
+.group-strip .teams { margin: 0; font-size: 27px; font-weight: 600; color: var(--paper); white-space: nowrap; }
+
+.bracket { position: relative; height: 486px; margin-top: 28px; }
+.bracket .wires { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.match {
+  position: absolute;
+  width: 320px;
+  padding: 15px 22px 17px;
+  border-radius: 18px;
+  background: var(--surface);
+  border: 2px solid var(--line-2);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.match .match__label {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ash-600);
+}
+.match .match__row {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  font-size: 25px;
+  font-weight: 600;
+  color: var(--paper);
+  white-space: nowrap;
+}
+.match .match__row .seed {
+  flex: none;
+  min-width: 36px;
+  font-family: var(--display);
+  font-size: 23px;
+  color: var(--gold);
+}
+.match--final { border-color: rgb(246 196 0 / 0.55); }
+.match--final .match__label { color: var(--gold); }
+.match--third { border-style: dashed; }
+.match--third .match__label { color: var(--gold); }
+
+.m-sf1 { left: 0; top: 58px; }
+.m-sf2 { left: 0; top: 298px; }
+.m-final { left: 592px; top: 178px; }
+.m-third { left: 592px; top: 342px; }
+
+.ch-foot { margin-top: auto; display: flex; flex-direction: column; gap: 24px; }
+.ch-foot__row { display: flex; align-items: center; justify-content: space-between; gap: 44px; }
+.ch-note { margin: 0; max-width: 30ch; font-size: 24px; line-height: 1.45; color: var(--ash); }
+.ch-note strong { color: var(--paper); font-weight: 600; }
+.ch-foot .qr-label strong { font-size: 19px; white-space: nowrap; }

@@ -319,6 +319,8 @@ npm run lint      # oxlint
   da página `/copa`, tudo derivado dos placares.
 - `src/lib/validation.ts` — mesmas regras de nome e nota que o banco aplica.
 - `supabase/migrations/` — o SQL aplicado no projeto.
+- `artes/` — artes 1:1 do feed do Instagram (HTML 1080×1080 e PNGs exportados
+  em `artes/export/`), na identidade visual do site; ver `artes/README.md`.
 - `scripts/copy-404.mjs` — copia o `index.html` do build para `404.html`
   (fallback dos links diretos no GitHub Pages).
 - `scripts/shoot-app.mjs` — tira fotos das telas internas no modo demonstração
@@ -334,6 +336,8 @@ node scripts/shoot-app.mjs --route times   --w 390 --clip header
 
   Rotas: `identificar, votar, revisar, enviado, encerrada, regulamento, privacidade,
   admin, ranking, times, cedulas, ajustes` e as da chave: `copa` (vazia, logado),
-  `copa-publica` (visão pública), `copa-cheia` (grupos e mata-mata completos) e
-  `copa-nomes` (área de renomear times aberta). `--clip <seletor>` recorta um
-  elemento. As imagens vão para `shots/app/` (fora do git).
+  `copa-publica` (visão pública), `copa-cheia` (grupos e mata-mata completos),
+  `copa-publica-cheia` (visão pública cheia) e `copa-times-salvo` (edição dos
+  integrantes de ponta a ponta). `--clip <seletor>` recorta um elemento; `--url
+  <caminho>` fotografa uma página direta (ex.: as artes em `/artes/...`). As
+  imagens vão para `shots/app/` (fora do git).

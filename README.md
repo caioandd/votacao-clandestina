@@ -320,10 +320,13 @@ npm run lint      # oxlint
 - `src/lib/validation.ts` — mesmas regras de nome e nota que o banco aplica.
 - `supabase/migrations/` — o SQL aplicado no projeto.
 - `artes/` — artes 4:5 do feed do Instagram (HTML 1080×1350 e PNGs exportados
-  em `artes/export/`), na identidade visual do site, mais a arte do campeão para
-  a base do troféu (6,5×6,5 cm); ver `artes/README.md`.
+  em `artes/export/`), na identidade visual do site, mais as peças de impressão
+  (medalha de 4,8 cm, arte do campeão de 6,5×6,5 cm e a folha A4 em tamanho
+  real que gera o PDF); ver `artes/README.md`.
 - `scripts/png-dpi.mjs` — carimba o DPI físico (chunk `pHYs`) num PNG, para
-  imprimir no tamanho certo (usado na arte do campeão).
+  imprimir no tamanho certo (usado nas peças da medalha e do campeão).
+- `scripts/print-app.mjs` — gera o PDF em tamanho real de uma página do app
+  pelo Chrome/Edge headless (usado na folha de impressão A4).
 - `scripts/copy-404.mjs` — copia o `index.html` do build para `404.html`
   (fallback dos links diretos no GitHub Pages).
 - `scripts/shoot-app.mjs` — tira fotos das telas internas no modo demonstração

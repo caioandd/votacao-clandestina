@@ -18,6 +18,7 @@
           copa, copa-publica, copa-cheia, copa-publica-cheia, copa-times-salvo.
   Opções: --w <largura> --h <altura> --out <arquivo.png> --base <url>
           --url <caminho> (página direta, sem seed — ex.: /artes/01-anuncio.html)
+          --alpha (PNG com fundo transparente, para peças de recorte)
           --act "<js>" (roda antes da foto) --settle <ms> --profile <dir>
 */
 
@@ -38,6 +39,7 @@ const W = +opt('w', 390)
 const VH = +opt('h', HEIGHTS[W] || 900)
 const DSF = +opt('dsf', W < 600 ? 2 : 1)
 const clipSel = opt('clip') && opt('clip') !== true ? String(opt('clip')) : null
+const alpha = !!opt('alpha')
 const label = (urlPath || route).replace(/^[/\\]+/, '').replace(/[^\w.-]+/g, '-') || 'pagina'
 const out = String(opt('out', `shots/app/${W}-${label}${clipSel ? '-clip' : ''}.png`))
 const base = String(opt('base', 'http://localhost:5180')).replace(/\/$/, '')
@@ -369,6 +371,11 @@ try {
   if (extraAct) {
     await ev(`(async () => { ${extraAct}; return 1 })()`)
     await sleep(600)
+  }
+
+  if (alpha) {
+    await S('Emulation.setDefaultBackgroundColorOverride', { color: { r: 0, g: 0, b: 0, a: 0 } })
+    await ev(`document.documentElement.style.background = 'transparent'; document.body.style.background = 'transparent'; 1`)
   }
 
   // 4. confere estouro horizontal e tira a foto

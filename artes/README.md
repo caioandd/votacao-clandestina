@@ -4,7 +4,9 @@ Artes **4:5 (1080×1350)** para o feed do Instagram, na identidade visual do sit
 (tinta `#0e0e10`, ouro `#f6c400`, placa branca do escudo com filete dourado,
 Anton nos títulos e Inter no texto). Cada `.frame` é um quadro 1080×1350 —
 exceto a `05-campeao.html`, que é a peça de 6,5×6,5 cm para a base do troféu
-(768×768 = 6,5 cm a 300 dpi).
+(768×768 = 6,5 cm a 300 dpi), a `06-medalha.html`, o disco de 4,8 cm de diâmetro
+(567×567 = 4,8 cm a 300 dpi), e a `folha-impressao.html`, que compõe as peças
+de impressão em uma folha A4 em tamanho real.
 
 | Arquivo | Quadros | Para quê |
 | --- | --- | --- |
@@ -13,6 +15,8 @@ exceto a `05-campeao.html`, que é a peça de 6,5×6,5 cm para a base do troféu
 | `03-chaveamento.html` | 1 | Grupos e chave: semifinais cruzadas, final e 3º lugar com QR |
 | `04-confrontos.html` | 1 | Os três jogos de cada grupo, na ordem divulgada, com QR |
 | `05-campeao.html` | 2 | Arte do campeão para a base do troféu: versão escura e clara |
+| `06-medalha.html` | 1 | Medalha circular (4,8 cm ⌀, fundo branco) para a premiação |
+| `folha-impressao.html` | — | Folha A4 em tamanho real: 6 medalhas + as duas versões da base do troféu (fonte do PDF) |
 
 Os integrantes e os jogos seguem a divisão oficial (mesma da página `/copa`).
 O QR aponta para `https://caioandd.github.io/votacao-clandestina/copa`.
@@ -63,3 +67,32 @@ node scripts/png-dpi.mjs artes/export/05-campeao-claro-600dpi.png 600
 
 > A pasta `artes/` fica fora de `public/`: é material de publicação, não vai
 > para o build do site. Os PNGs exportados ficam em `artes/export/`.
+
+## Exportar a medalha (4,8 cm de diâmetro)
+
+A medalha é um disco de fundo branco; exporte com `--alpha` para os cantos
+saírem transparentes e facilitar o recorte:
+
+```bash
+node scripts/shoot-app.mjs --url /artes/06-medalha.html --w 567 --h 567 --dsf 1 --alpha --clip "#medalha" --out artes/export/06-medalha-300dpi.png
+node scripts/shoot-app.mjs --url /artes/06-medalha.html --w 567 --h 567 --dsf 2 --alpha --clip "#medalha" --out artes/export/06-medalha-600dpi.png
+node scripts/png-dpi.mjs artes/export/06-medalha-300dpi.png 300
+node scripts/png-dpi.mjs artes/export/06-medalha-600dpi.png 600
+```
+
+> 567×567 px = 4,8 cm a 300 dpi (a versão 600 dpi sai 1134×1134).
+
+## Gerar o PDF da folha de impressão (A4, tamanho real)
+
+A `folha-impressao.html` traz **6 medalhas + as duas versões da base do
+troféu** (use a que combinar; a outra fica de reserva) em tamanho real, com
+guias de corte tracejadas. Gere o PDF e imprima em **A4, escala 100%**:
+
+```bash
+node scripts/print-app.mjs --url /artes/folha-impressao.html --out artes/export/folha-impressao-medalhas-trofeu.pdf
+```
+
+> O `print-app.mjs` usa o Chrome/Edge headless (`Page.printToPDF`) e respeita o
+> `@page` A4 do CSS: as peças saem no tamanho físico exato (medalha 4,8 cm,
+> base 6,5×6,5 cm). Imprima sem “ajustar à página” e confira com a régua antes
+> de recortar.

@@ -160,6 +160,8 @@ body {
    03 · chave     →  .chave
    04 · confrontos →  .fx-*
    05 · campeão   →  .campeao (6,5×6,5 cm a 300 dpi: 768×768)
+   06 · medalha   →  .medalha (4,8 cm de diâmetro a 300 dpi: 567×567)
+   + folha A4 de impressão (tamanho real) → .sheet / .piece
    ============================================================================ */
 
 /* ----------------------------------------------------------- campos comuns */
@@ -454,3 +456,119 @@ body {
 .campeao--claro .campeao-rule { background: var(--gold-deep); }
 .campeao--claro .campeao-date { color: var(--ink); }
 .campeao--claro .campeao-local { color: #808087; }
+
+/* ------------------------------------------------------------ 06 · medalha */
+
+/* Medalha circular, fundo branco: 567 px = 4,8 cm de diâmetro a 300 dpi.
+   Exporte com --alpha no shoot-app.mjs para os cantos saírem transparentes. */
+
+.medalha {
+  width: 567px;
+  height: 567px;
+  padding: 0 96px;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.medalha::after {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border-radius: 50%;
+  border: 8px solid var(--gold);
+  pointer-events: none;
+}
+.medalha .kicker { gap: 10px; font-size: 17px; color: var(--gold-deep); }
+.medalha .kicker .dot { width: 11px; height: 11px; background: var(--gold-deep); }
+
+.medalha-plate {
+  flex: none;
+  width: 160px;
+  height: 146px;
+  margin-top: 16px;
+  border: 2px solid #e3e3df;
+  border-bottom: 10px solid var(--gold);
+}
+
+.medalha-title { margin-top: 20px; font-size: 96px; }
+
+.medalha-rule {
+  flex: none;
+  width: 64px;
+  height: 8px;
+  margin-top: 14px;
+  background: var(--gold-deep);
+}
+
+.medalha-date { margin: 12px 0 0; font-size: 22px; font-weight: 700; color: #808087; }
+
+/* --------------------------------- folha de impressão (A4, tamanho real) */
+
+/* Compõe as artes em tamanho físico (mm): 6 medalhas de 4,8 cm + a base do
+   troféu de 6,5 cm. Cada quadro de 300 dpi é reduzido em 0.32 para casar com
+   as unidades físicas (567 px = 181,4 px CSS = 48 mm; 768 px = 245,8 = 65 mm). */
+
+@page { size: A4; margin: 0; }
+
+.sheet {
+  width: 210mm;
+  height: 296.5mm;
+  padding: 8mm 10mm;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7mm;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+@media screen {
+  body.sheet-body { background: #e6e6e6; }
+  .sheet { margin: 8mm auto; box-shadow: 0 2px 14px rgb(0 0 0 / 0.18); }
+}
+@media print {
+  body.sheet-body { background: #fff; }
+}
+
+.sheet-title { margin: 0; font-size: 8pt; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
+.sheet-note { margin: 0; font-size: 7pt; color: #6d6d73; }
+.sheet-note strong { color: var(--ink); }
+
+.sheet-label {
+  margin: 2mm 0 0;
+  font-size: 7pt;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6d6d73;
+}
+.sheet-label:last-of-type { margin-top: auto; }
+
+.sheet-row { width: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 8mm; break-inside: avoid; }
+
+.piece { position: relative; overflow: hidden; break-inside: avoid; }
+.piece > .frame { position: absolute; top: 0; left: 0; transform: scale(0.32); transform-origin: 0 0; }
+.piece--round { width: 48mm; height: 48mm; }
+.piece--round::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 0.3mm dashed #c9c9c9;
+}
+.piece--square { width: 65mm; height: 65mm; }
+.piece--square::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 0.3mm dashed #c9c9c9;
+}
+
+.sheet-pair { display: flex; gap: 10mm; break-inside: avoid; }
+.sheet-pair figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 1.6mm; }
+.sheet-pair figcaption { font-size: 6.5pt; letter-spacing: 0.12em; text-transform: uppercase; color: #6d6d73; }

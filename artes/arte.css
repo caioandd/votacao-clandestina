@@ -158,6 +158,8 @@ body {
    01 · anúncio   →  .anuncio
    02 · times     →  .cover (capa) e .time (um quadro por time)
    03 · chave     →  .chave
+   04 · confrontos →  .fx-*
+   05 · campeão   →  .campeao (6,5×6,5 cm a 300 dpi: 768×768)
    ============================================================================ */
 
 /* ----------------------------------------------------------- campos comuns */
@@ -392,3 +394,63 @@ body {
 .fx-note { margin: 0; max-width: 36ch; font-size: 24px; line-height: 1.45; color: var(--ash); }
 .fx-note strong { color: var(--paper); font-weight: 600; }
 .fx-foot .qr-label strong { font-size: 20px; white-space: nowrap; }
+
+/* ------------------------------------------------------------ 05 · campeão */
+
+/* Peça quadrada para a base do troféu: 768 px = 6,5 cm a 300 dpi.
+   Versão escura (identidade do site) e versão clara, para bases escuras. */
+
+.campeao {
+  width: 768px;
+  height: 768px;
+  padding: 56px 60px 50px;
+  align-items: center;
+  text-align: center;
+}
+.campeao .kicker { font-size: 20px; }
+
+.campeao-plate {
+  flex: none;
+  width: 236px;
+  height: 214px;
+  margin-top: auto;
+  border-bottom-width: 10px;
+}
+
+.campeao-title { margin-top: 30px; font-size: 148px; }
+
+.campeao-rule {
+  flex: none;
+  width: 96px;
+  height: 10px;
+  margin-top: 22px;
+  background: var(--gold);
+}
+
+.campeao-foot {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.campeao-date { margin: 0; font-size: 27px; font-weight: 700; color: var(--paper); }
+.campeao-local {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ash-600);
+}
+
+.campeao--claro { background: linear-gradient(180deg, #ffffff 0%, #f1f1ee 100%); }
+.campeao--claro .kicker { color: var(--gold-deep); }
+.campeao--claro .kicker .dot { background: var(--gold-deep); }
+.campeao--claro .campeao-plate {
+  border: 2px solid #e3e3df;
+  border-bottom: 10px solid var(--gold);
+}
+.campeao--claro .campeao-title { color: var(--ink); }
+.campeao--claro .campeao-rule { background: var(--gold-deep); }
+.campeao--claro .campeao-date { color: var(--ink); }
+.campeao--claro .campeao-local { color: #808087; }

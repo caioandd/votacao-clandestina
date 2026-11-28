@@ -65,8 +65,10 @@ com a chave inteira editável (placares, nomes e integrantes).
      [`20261125000200_times_do_campeonato.sql`](supabase/migrations/20261125000200_times_do_campeonato.sql)
      (os seis times da 3ª Copa e a tabela oficial dos jogos) e o
      [`20261125000300_integrantes_dos_times.sql`](supabase/migrations/20261125000300_integrantes_dos_times.sql)
-     (integrantes dos times na seção *Times e integrantes* da `/copa`). Todos
-     são idempotentes.
+     (integrantes dos times na seção *Times e integrantes* da `/copa`) e o
+     [`20261128000100_admin_por_email.sql`](supabase/migrations/20261128000100_admin_por_email.sql)
+     (promove o e-mail `202011130028@ifba.edu.br` a admin — rode depois do
+     primeiro login dessa conta). Todos são idempotentes.
 3. Em **Project Settings → API**, copie:
    - **Project URL** → `VITE_SUPABASE_URL`
    - a chave pública → `VITE_SUPABASE_ANON_KEY` (no projeto novo ela aparece como
@@ -162,6 +164,11 @@ on conflict (user_id) do nothing;
 ```
 
 Pronto: essa conta passa a ver o painel em `/admin` (e a editar a chave em `/copa`).
+
+> A migration 008 já faz exatamente isso para `202011130028@ifba.edu.br`. Para
+> promover outras contas, troque o e-mail no trecho acima. Lembre-se de incluir
+> a conta também entre as contas de teste do app OAuth (seção 3), caso ele
+> ainda não esteja publicado.
 
 ---
 
